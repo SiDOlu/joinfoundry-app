@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JoinFoundry — Idea → Boardroom in 7 Days</title>
+<style>
+ :root {
+ --bg: #0a0a0a;
+ --text: #e5e5e5;
+ --green: #00ff88;
+ --gray: #525252;
+ --font: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ body {
+ background: var(--bg);
+ color: var(--text);
+ font-family: var(--font);
+ font-size: 14px;
+ line-height: 1.6;
+ padding: 16px;
+ min-height: 100vh;
+ }
+ .container {
+ max-width: 680px;
+ margin: 0 auto;
+ padding-top: 8vh;
+ }
+ .header { color: var(--gray); margin-bottom: 24px; }
+ .prompt { color: var(--green); }
+ .input-wrap {
+ display: flex;
+ align-items: flex-start;
+ gap: 8px;
+ margin: 16px 0;
+ }
+ #problemInput {
+ background: transparent;
+ border: none;
+ color: var(--text);
+ font-family: var(--font);
+ font-size: 14px;
+ width: 100%;
+ resize: none;
+ outline: none;
+ min-height: 120px;
+ line-height: 1.6;
+ }
+ .hint {
+ color: var(--gray);
+ font-size: 12px;
+ margin-top: 8px;
+ }
+ .examples {
+ margin-top: 32px;
+ border-top: 1px solid #1f1f1f;
+ padding-top: 16px;
+ }
+ .examples h3 {
+ color: var(--gray);
+ font-size: 12px;
+ margin-bottom: 12px;
+ font-weight: normal;
+ }
+ .example {
+ color: var(--gray);
+ font-size: 13px;
+ margin-bottom: 8px;
+ cursor: pointer;
+ }
+ .example:hover { color: var(--text); }
+ @media (max-width: 480px) {
+ body { font-size: 13px; padding: 12px; }
+ .container { padding-top: 4vh; }
+ #problemInput { min-height: 140px; }
+ }
+</style>
+</head>
+<body>
+<div class="container">
+ <div class="header">
+ Foundry v1.0.0 — Idea → Boardroom in 7 Days<br>
+ Docs: joinfoundry.run/docs
+ </div>
+
+ <div>
+ <span class="prompt">$</span> joinfoundry run
+ </div>
+ <div>
+ <span class="prompt">></span> describe --problem
+ </div>
+
+ <div class="input-wrap">
+ <span class="prompt">|</span>
+ <textarea
+ id="problemInput"
+ placeholder="UK nurses get toe blisters. 12h shifts. £2B anti-chafe market. I think a toe-gap applicator solves it."
+ maxlength="1200"
+ autofocus
+ ></textarea>
+ </div>
+
+ <div class="hint">
+ <span id="charCount">0</span>/200 words. Press Enter to build.
+ </div>
+
+ <div class="examples">
+ <h3>EXAMPLES — click to use:</h3>
+ <div class="example" data-text="UK nurses get toe blisters. 12h shifts. £2B anti-chafe market. Current solutions fail on wet skin. Toe-gap antiperspirant stick solves application problem.">Beauty tech: Toe-gap applicator</div>
+ <div class="example" data-text="NHS staff burnout costs £8B yearly. Roster data predicts risk 2 weeks early. No current system flags it. AI model + FHIR integration can alert managers before sick leave.">Healthtech: NHS burnout prediction</div>
+ <div class="example" data-text="SME exporters wait 90 days for invoice payment. £22B locked in receivables. Banks won't lend under £250k. API connects to HMRC + Companies House to underwrite in 24hrs.">Fintech: SME invoice finance</div>
+ </div>
+</div>
+
+<script>
+const input = document.getElementById('problemInput');
+const charCount = document.getElementById('charCount');
+
+// Word counter
+input.addEventListener('input', () => {
+ const words = input.value.trim().split(/\s+/).filter(w => w.length > 0);
+ const count = input.value.trim() === ''? 0 : words.length;
+ charCount.textContent = count;
+ charCount.style.color = count > 200? '#ff5555' : '#525252';
+});
+
+// Submit on Enter — Shift+Enter for newline
+input.addEventListener('keydown', (e) => {
+ if (e.key === 'Enter' &&!e.shiftKey) {
+ e.preventDefault();
+ const text = input.value.trim();
+ const words = text.split(/\s+/).filter(w => w.length > 0).length;
+
+ if (text.length < 20) {
+ alert('Too short. Describe the problem in at least 20 characters.');
+ return;
+ }
+ if (words > 200) {
+ alert('Keep it under 200 words. Founders who can\'t be concise don\'t get meetings.');
+ return;
+ }
+
+ // Store and go to build page
+ localStorage.setItem('foundry_problem', text);
+ localStorage.setItem('foundry_slug', slugify(text));
+ window.location.href = 'build.html';
+ }
+});
+
+// Example clicks
+document.querySelectorAll('.example').forEach(el => {
+ el.addEventListener('click', () => {
+ input.value = el.dataset.text;
+ input.dispatchEvent(new Event('input'));
+ input.focus();
+ });
+});
+
+function slugify(text) {
+ return text.toLowerCase()
+ .slice(0, 30)
+ .replace(/[^\w\s-]/g, '')
+ .replace(/\s+/g, '-')
+ .replace(/--+/g, '-');
+}
+</script>
+</body>
+</html>

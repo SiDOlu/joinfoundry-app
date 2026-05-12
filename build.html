@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building Data Room...</title>
+<style>
+ :root {
+ --bg: #0a0a0a;
+ --text: #e5e5e5;
+ --green: #00ff88;
+ --yellow: #ffaa00;
+ --gray: #525252;
+ --font: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ body {
+ background: var(--bg);
+ color: var(--text);
+ font-family: var(--font);
+ font-size: 13px;
+ line-height: 1.6;
+ padding: 16px;
+ }
+ .container { max-width: 680px; margin: 0 auto; padding-top: 4vh; }
+ .log { margin-bottom: 4px; opacity: 0; animation: fadeIn 0.2s forwards; }
+ .success { color: var(--green); }
+ .warning { color: var(--yellow); }
+ .dim { color: var(--gray); }
+ .cursor {
+ display: inline-block;
+ width: 8px;
+ height: 16px;
+ background: var(--text);
+ animation: blink 1s infinite;
+ }
+ @keyframes fadeIn { to { opacity: 1; } }
+ @keyframes blink { 50% { opacity: 0; } }
+ @media (max-width: 480px) {
+ body { font-size: 12px; padding: 12px; }
+ }
+</style>
+</head>
+<body>
+<div class="container" id="logs">
+ <div class="log">$ joinfoundry build "<span id="slug"></span>"</div>
+</div>
+
+<script>
+const logs = document.getElementById('logs');
+const problem = localStorage.getItem('foundry_problem') || 'Unknown project';
+const slug = localStorage.getItem('foundry_slug') || 'project';
+document.getElementById('slug').textContent = slug;
+
+// Log sequence — customize per vertical later
+const logSteps = [
+ { text: '', delay: 300 },
+ { text: '[1/6] Fetching market demand...', delay: 400 },
+ { text: ' ✓ Google Trends: "blister prevention" 22,100/mo +32% YoY', delay: 500, class: 'success' },
+ { text: ' ✓ ONS: Footcare TAM £2.1B, CAGR 4.1%', delay: 500, class: 'success' },
+ { text: '[2/6] Scanning white space...', delay: 600 },
+ { text: ' ✓ Boots.com: 0 SKUs for "toe applicator"', delay: 500, class: 'success' },
+ { text: ' ✓ Amazon: Scholl 3.2★. Top complaint: "doesn\'t reach gaps" [1,240 reviews]', delay: 500, class: 'success' },
+ { text: '[3/6] Checking regulatory path...', delay: 600 },
+ { text: ' ✓ MHRA: Cosmetic notification. 6 weeks. No claims = no DTAC', delay: 500, class: 'success' },
+ { text: '[4/6] Querying supply chain...', delay: 600 },
+ { text: ' ✓ Alibaba: 12 factories PP stick. MOQ 2k. £2.80 landed DDP', delay: 500, class: 'success' },
+ { text: '[5/6] Analyzing founder velocity...', delay: 600 },
+ { text: ' ✓ LinkedIn: 8 posts/90d. Comments replied. Domain expert.', delay: 500, class: 'success' },
+ { text: '[6/6] Institutional signal...', delay: 600 },
+ { text: ' ✓ PubMed: 3 RCTs on aluminum salts + friction reduction', delay: 500, class: 'success' },
+ { text: ' ✓ Leeds Podiatry: Lab contact found. Testing available Q1.', delay: 500, class: 'success' },
+ { text: '', delay: 400 },
+ { text: 'Build complete. Viability Score: 87/100', delay: 600, class: 'success' },
+ { text: '', delay: 400 },
+ { text: '$ joinfoundry deploy --boardroom', delay: 300 },
+ { text: '> _<span class="cursor"></span>', delay: 300, final: true }
+];
+
+let i = 0;
+function printLog() {
+ if (i >= logSteps.length) {
+ setTimeout(() => window.location.href = 'dataroom.html', 1500);
+ return;
+ }
+ const step = logSteps[i];
+ const div = document.createElement('div');
+ div.className = `log ${step.class || ''}`;
+ div.innerHTML = step.text;
+ logs.appendChild(div);
+ window.scrollTo(0, document.body.scrollHeight);
+ i++;
+ setTimeout(printLog, step.delay);
+}
+
+setTimeout(printLog, 300);
+</script>
+</body>
+</html>

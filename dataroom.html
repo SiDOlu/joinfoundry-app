@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Room — StrideShield</title>
+<style>
+ :root {
+ --bg: #0a0a0a;
+ --card: #111111;
+ --border: #1f1f1f;
+ --text: #e5e5e5;
+ --text-dim: #a3a3a3;
+ --green: #00ff88;
+ --yellow: #ffaa00;
+ --red: #ff5555;
+ --blue: #3b82f6;
+ --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ body {
+ background: var(--bg);
+ color: var(--text);
+ font-family: var(--font);
+ font-size: 14px;
+ line-height: 1.5;
+ }
+ .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+ /* Header */
+ .header {
+ display: flex;
+ justify-content: space-between;
+ align-items: flex-start;
+ gap: 16px;
+ margin-bottom: 24px;
+ flex-wrap: wrap;
+ }
+ .title h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+ .title p { color: var(--text-dim); font-size: 13px; }
+ .actions { display: flex; gap: 8px; }
+ .btn {
+ background: var(--card);
+ border: 1px solid var(--border);
+ color: var(--text);
+ padding: 8px 12px;
+ border-radius: 6px;
+ font-size: 13px;
+ cursor: pointer;
+ font-family: var(--font);
+ }
+ .btn-primary {
+ background: var(--text);
+ color: var(--bg);
+ border: none;
+ font-weight: 500;
+ }
+ .btn:hover { opacity: 0.8; }
+
+ /* Score Card */
+ .score-card {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 20px;
+ margin-bottom: 16px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ flex-wrap: wrap;
+ gap: 16px;
+ }
+ .score-left { display: flex; align-items: center; gap: 16px; }
+ .score-ring {
+ width: 64px;
+ height: 64px;
+ border-radius: 50%;
+ background: conic-gradient(var(--green) 0deg 313deg, var(--border) 313deg 360deg);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 20px;
+ font-weight: 600;
+ }
+ .score-ring span {
+ background: var(--card);
+ width: 52px;
+ height: 52px;
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ }
+ .score-label h2 { font-size: 16px; margin-bottom: 2px; }
+ .score-label p { color: var(--text-dim); font-size: 13px; }
+ .badge {
+ background: rgba(0, 255, 136, 0.1);
+ color: var(--green);
+ padding: 4px 10px;
+ border-radius: 16px;
+ font-size: 12px;
+ font-weight: 500;
+ }
+
+ /* Tabs */
+ .tabs {
+ display: flex;
+ gap: 4px;
+ border-bottom: 1px solid var(--border);
+ margin-bottom: 16px;
+ overflow-x: auto;
+ }
+ .tab {
+ padding: 8px 12px;
+ color: var(--text-dim);
+ cursor: pointer;
+ border-bottom: 2px solid transparent;
+ font-size: 13px;
+ white-space: nowrap;
+ }
+ .tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+ /* Pillar Grid */
+ .grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+ gap: 12px;
+ margin-bottom: 24px;
+ }
+ .card {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ }
+ .card-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 12px;
+ }
+ .card h3 { font-size: 13px; font-weight: 500; color: var(--text-dim); }
+ .card-score { font-size: 13px; font-weight: 600; }
+ .metric {
+ display: flex;
+ justify-content: space-between;
+ font-size: 13px;
+ margin-bottom: 8px;
+ }
+ .metric-label { color: var(--text-dim); }
+ .bar {
+ height: 4px;
+ background: var(--border);
+ border-radius: 2px;
+ overflow: hidden;
+ margin-top: 12px;
+ }
+ .bar-fill { height: 100%; background: var(--green); }
+
+ /* Matched Companies */
+ .section-title {
+ font-size: 14px;
+ font-weight: 600;
+ margin: 24px 0 12px 0;
+ }
+ .company {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ margin-bottom: 8px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 12px;
+ }
+ .company-info h4 { font-size: 14px; margin-bottom: 2px; }
+ .company-info p { color: var(--text-dim); font-size: 12px; }
+ .status {
+ font-size: 12px;
+ color: var(--yellow);
+ }
+
+ /* Mobile */
+ @media (max-width: 640px) {
+ body { font-size: 13px; }
+ .container { padding: 12px; }
+ .header { margin-bottom: 16px; }
+ .title h1 { font-size: 18px; }
+ .actions { width: 100%; }
+ .btn { flex: 1; text-align: center; }
+ .score-card { padding: 16px; }
+ .grid { grid-template-columns: 1fr; }
+ }
+</style>
+</head>
+<body>
+<div class="container">
+ <!-- Header -->
+ <div class="header">
+ <div class="title">
+ <h1 id="projectName">StrideShield</h1>
+ <p id="projectProblem">Toe-gap antiperspirant stick for 12h shift workers</p>
+ </div>
+ <div class="actions">
+ <button class="btn" onclick="shareRoom()">Share</button>
+ <button class="btn-primary" onclick="deployBoardroom()">Deploy to Boardroom</button>
+ </div>
+ </div>
+
+ <!-- Score -->
+ <div class="score-card">
+ <div class="score-left">
+ <div class="score-ring"><span>87</span></div>
+ <div class="score-label">
+ <h2>Strong Pitch</h2>
+ <p>Viability Score out of 100</p>
+ </div>
+ </div>
+ <div class="badge">Ready for Boardroom</div>
+ </div>
+
+ <!-- Tabs -->
+ <div class="tabs">
+ <div class="tab active" data-tab="overview">Overview</div>
+ <div class="tab" data-tab="market">Market</div>
+ <div class="tab" data-tab="competitors">Competitors</div>
+ <div class="tab" data-tab="supply">Supply Chain</div>
+ <div class="tab" data-tab="regulatory">Regulatory</div>
+ </div>
+
+ <!-- Overview Grid -->
+ <div id="overview" class="tab-content">
+ <div class="grid">
+ <div class="card">
+ <div class="card-header">
+ <h3>MARKET DEMAND</h3>
+ <div class="card-score" style="color: var(--green)">18/20</div>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Search Volume</span>
+ <span>22.1k/mo</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">TAM — UK Footcare</span>
+ <span>£2.1B</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Growth</span>
+ <span style="color: var(--green)">+32% YoY</span>
+ </div>
+ <div class="bar"><div class="bar-fill" style="width: 90%"></div></div>
+ </div>
+
+ <div class="card">
+ <div class="card-header">
+ <h3>WHITE SPACE</h3>
+ <div class="card-score" style="color: var(--green)">23/25</div>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Boots.com SKUs</span>
+ <span>0</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Price Gap vs Scholl</span>
+ <span>£7.00</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Top Complaint</span>
+ <span>"Can't reach gaps"</span>
+ </div>
+ <div class="bar"><div class="bar-fill" style="width: 92%"></div></div>
+ </div>
+
+ <div class="card">
+ <div class="card-header">
+ <h3>REGULATORY PATH</h3>
+ <div class="card-score" style="color: var(--green)">15/15</div>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Classification</span>
+ <span>Cosmetic</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Time to Market</span>
+ <span>6 weeks</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">DTAC Required</span>
+ <span>No</span>
+ </div>
+ <div class="bar"><div class="bar-fill" style="width: 100%"></div></div>
+ </div>
+
+ <div class="card">
+ <div class="card-header">
+ <h3>SUPPLY CHAIN FIT</h3>
+ <div class="card-score" style="color: var(--green)">14/15</div>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Factories Identified</span>
+ <span>12</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Landed Cost</span>
+ <span>£2.80 DDP</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">MOQ</span>
+ <span>2,000 units</span>
+ </div>
+ <div class="bar"><div class="bar-fill" style="width: 93%"></div></div>
+ </div>
+
+ <div class="card">
+ <div class="card-header">
+ <h3>FOUNDER VELOCITY</h3>
+ <div class="card-score" style="color: var(--yellow)">8/10</div>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Posts Last 90d</span>
+ <span>8</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Domain Experience</span>
+ <span>Ex-security guard</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Prev Exits</span>
+ <span>0</span>
+ </div>
+ <div class="bar"><div class="bar-fill" style="width: 80%; background: var(--yellow)"></div></div>
+ </div>
+
+ <div class="card">
+ <div class="card-header">
+ <h3>INSTITUTIONAL SIGNAL</h3>
+ <div class="card-score" style="color: var(--yellow)">9/15</div>
+ </div>
+ <div class="metric">
+ <span class="metric-label">PubMed RCTs</span>
+ <span>3</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">NHS Citation</span>
+ <span>Foot sweat mentioned</span>
+ </div>
+ <div class="metric">
+ <span class="metric-label">Uni Lab Access</span>
+ <span>Leeds Podiatry Q1</span>
+ </div>
+ <div class="bar"><div class="bar-fill" style="width: 60%; background: var(--yellow)"></div></div>
+ </div>
+ </div>
+
+ <div class="section-title">Matched Companies — Auto-Invited if Score >70</div>
+ <div class="company">
+ <div class="company-info">
+ <h4>Boots Innovation Team</h4>
+ <p>Own-brand buyer. Reason: 0 SKUs in category, £2B TAM</p>
+ </div>
+ <div class="status">Pending Invite</div>
+ </div>
+ <div class="company">
+ <div class="company-info">
+ <h4>Laleham Health & Beauty</h4>
+ <p>Contract manufacturer. Reason: Has 12mm line, GMP certified</p>
+ </div>
+ <div class="status">Pending Invite</div>
+ </div>
+ <div class="company">
+ <div class="company-info">
+ <h4>NHS Supply Chain</h4>
+ <p>Procurement. Reason: £40M footcare spend, staff wellness mandate</p>
+ </div>
+ <div class="status">Pending Invite</div>
+ </div>
+ </div>
+
+ <!-- Other tabs hidden for MVP -->
+ <div id="market" class="tab-content" style="display:none">
+ <div class="card"><p style="color:var(--text-dim)">Detailed market data, search trends, TAM breakdown. Coming in v1.1</p></div>
+ </div>
+</div>
+
+<script>
+// Load data from localStorage
+const problem = localStorage.getItem('foundry_problem') || 'Unknown project';
+const slug = localStorage.getItem('foundry_slug') || 'project';
+
+// Set title — first 2 words of problem as name for MVP
+document.getElementById('projectName').textContent = 
+ problem.split(' ').slice(0, 2).join(' ') || 'StrideShield';
+document.getElementById('projectProblem').textContent = 
+ problem.length > 80? problem.slice(0, 80) + '...' : problem;
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+ tab.addEventListener('click', () => {
+ document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+ document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+ tab.classList.add('active');
+ document.getElementById(tab.dataset.tab).style.display = 'block';
+ });
+});
+
+// Actions
+function shareRoom() {
+ const url = `https://joinfoundry.run/p/${slug}`;
+ navigator.clipboard.writeText(url);
+ alert('Public link copied: ' + url);
+}
+
+function deployBoardroom() {
+ localStorage.setItem('foundry_status', 'boardroom');
+ window.location.href = 'boardroom.html';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boardroom — StrideShield</title>
+<style>
+ :root {
+ --bg: #0a0a0a;
+ --card: #111111;
+ --border: #1f1f1f;
+ --text: #e5e5e5;
+ --text-dim: #a3a3a3;
+ --green: #00ff88;
+ --yellow: #ffaa00;
+ --red: #ff5555;
+ --blue: #3b82f6;
+ --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ body {
+ background: var(--bg);
+ color: var(--text);
+ font-family: var(--font);
+ font-size: 14px;
+ line-height: 1.5;
+ }
+ .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+ /* Header */
+ .header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 24px;
+ flex-wrap: wrap;
+ gap: 12px;
+ }
+ .header-left h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+ .header-left p { color: var(--text-dim); font-size: 13px; }
+ .live-badge {
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ background: rgba(255, 85, 0.1);
+ color: var(--red);
+ padding: 6px 12px;
+ border-radius: 16px;
+ font-size: 12px;
+ font-weight: 500;
+ }
+ .live-dot {
+ width: 6px;
+ height: 6px;
+ background: var(--red);
+ border-radius: 50%;
+ animation: pulse 2s infinite;
+ }
+ @keyframes pulse { 50% { opacity: 0.3; } }
+
+ /* Status Bar */
+ .status-bar {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ margin-bottom: 16px;
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+ gap: 16px;
+ }
+ .status-item h3 { color: var(--text-dim); font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+ .status-item p { font-size: 14px; font-weight: 500; }
+ .timer { color: var(--yellow); }
+
+ /* Main Grid */
+ .grid {
+ display: grid;
+ grid-template-columns: 1fr 380px;
+ gap: 16px;
+ }
+ @media (max-width: 900px) {
+ .grid { grid-template-columns: 1fr; }
+ }
+
+ /* Data Room Panel */
+ .panel {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ }
+ .panel-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 16px;
+ }
+ .panel h2 { font-size: 14px; font-weight: 600; }
+ .data-item {
+ display: flex;
+ justify-content: space-between;
+ padding: 10px 0;
+ border-bottom: 1px solid var(--border);
+ font-size: 13px;
+ }
+ .data-item:last-child { border-bottom: none; }
+ .data-label { color: var(--text-dim); }
+ .risk-flag {
+ background: rgba(255, 170, 0, 0.1);
+ color: var(--yellow);
+ padding: 12px;
+ border-radius: 6px;
+ font-size: 12px;
+ margin-top: 12px;
+ }
+
+ /* Attendees */
+ .attendee {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ margin-bottom: 12px;
+ }
+ .attendee-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: flex-start;
+ margin-bottom: 12px;
+ }
+ .attendee h4 { font-size: 14px; margin-bottom: 2px; }
+ .attendee p { color: var(--text-dim); font-size: 12px; }
+ .attendee-status {
+ font-size: 11px;
+ padding: 3px 8px;
+ border-radius: 12px;
+ font-weight: 500;
+ }
+ .status-accepted { background: rgba(0, 255, 136, 0.1); color: var(--green); }
+ .status-pending { background: rgba(255, 170, 0, 0.1); color: var(--yellow); }
+ .vote-buttons {
+ display: flex;
+ gap: 6px;
+ margin-top: 12px;
+ }
+ .vote-btn {
+ flex: 1;
+ padding: 8px;
+ border: 1px solid var(--border);
+ background: var(--bg);
+ color: var(--text-dim);
+ border-radius: 6px;
+ font-size: 12px;
+ cursor: pointer;
+ font-family: var(--font);
+ }
+ .vote-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+ .vote-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+ /* Agenda */
+ .agenda {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ margin-top: 16px;
+ }
+ .agenda-item {
+ display: flex;
+ gap: 12px;
+ padding: 8px 0;
+ font-size: 13px;
+ }
+ .agenda-time { color: var(--text-dim); min-width: 60px; }
+ .agenda-current { color: var(--green); font-weight: 500; }
+
+ /* Mobile */
+ @media (max-width: 640px) {
+ body { font-size: 13px; }
+ .container { padding: 12px; }
+ .header-left h1 { font-size: 16px; }
+ .status-bar { grid-template-columns: 1fr 1fr; }
+ .grid { gap: 12px; }
+ }
+</style>
+</head>
+<body>
+<div class="container">
+ <!-- Header -->
+ <div class="header">
+ <div class="header-left">
+ <h1 id="projectName">StrideShield Boardroom</h1>
+ <p>Scheduled: Jan 15, 2:00pm GMT</p>
+ </div>
+ <div class="live-badge" id="liveBadge" style="display:none">
+ <div class="live-dot"></div>
+ LIVE
+ </div>
+ </div>
+
+ <!-- Status Bar -->
+ <div class="status-bar">
+ <div class="status-item">
+ <h3>STATUS</h3>
+ <p id="callStatus">Invites Sent</p>
+ </div>
+ <div class="status-item">
+ <h3>ATTENDING</h3>
+ <p id="attendeeCount">0 of 3</p>
+ </div>
+ <div class="status-item">
+ <h3>TIME TO CALL</h3>
+ <p class="timer" id="countdown">6d 14h</p>
+ </div>
+ <div class="status-item">
+ <h3>DECISION</h3>
+ <p id="voteStatus">Pending</p>
+ </div>
+ </div>
+
+ <!-- Main Grid -->
+ <div class="grid">
+ <!-- Left: Data Room -->
+ <div>
+ <div class="panel">
+ <div class="panel-header">
+ <h2>Data Room — Live</h2>
+ <button class="vote-btn" style="flex:none;padding:4px 10px;" onclick="shareData()">Share</button>
+ </div>
+ <div class="data-item">
+ <span class="data-label">Viability Score</span>
+ <span style="color:var(--green);font-weight:600;">87/100</span>
+ </div>
+ <div class="data-item">
+ <span class="data-label">Market Demand</span>
+ <span>22.1k/mo searches</span>
+ </div>
+ <div class="data-item">
+ <span class="data-label">White Space</span>
+ <span>0 SKUs in Boots</span>
+ </div>
+ <div class="data-item">
+ <span class="data-label">Regulatory Path</span>
+ <span>Cosmetic, 6 weeks</span>
+ </div>
+ <div class="data-item">
+ <span class="data-label">Supply Cost</span>
+ <span>£2.80 landed DDP</span>
+ </div>
+ <div class="risk-flag">
+ <strong>Top Risk:</strong> If NHS wants DTAC compliance, timeline extends to 18mo. Mitigation: Position as cosmetic, not medical device.
+ </div>
+ </div>
+
+ <div class="agenda">
+ <h2 style="font-size:14px;margin-bottom:12px;">Agenda — 20 Minutes</h2>
+ <div class="agenda-item agenda-current">
+ <span class="agenda-time">0-5min</span>
+ <span>Founder: Problem + why now. Data on screen.</span>
+ </div>
+ <div class="agenda-item">
+ <span class="agenda-time">5-12min</span>
+ <span>Companies ask questions. AI transcribes + flags risks.</span>
+ </div>
+ <div class="agenda-item">
+ <span class="agenda-time">12-20min</span>
+ <span>Go/No-Go vote. Terms discussed if 2+ Interested.</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- Right: Attendees -->
+ <div>
+ <div class="panel">
+ <h2 style="margin-bottom:16px;">Attendees + Votes</h2>
+ 
+ <div class="attendee" id="attendee-boots">
+ <div class="attendee-header">
+ <div>
+ <h4>Boots Innovation Team</h4>
+ <p>Own-brand buyer</p>
+ </div>
+ <div class="attendee-status status-accepted">Accepted</div>
+ </div>
+ <div class="vote-buttons">
+ <button class="vote-btn" data-company="boots" data-vote="interested">Interested</button>
+ <button class="vote-btn" data-company="boots" data-vote="pass">Pass</button>
+ <button class="vote-btn" data-company="boots" data-vote="advisor">Advisor</button>
+ </div>
+ </div>
+
+ <div class="attendee" id="attendee-laleham">
+ <div class="attendee-header">
+ <div>
+ <h4>Laleham Health & Beauty</h4>
+ <p>Contract manufacturer</p>
+ </div>
+ <div class="attendee-status status-accepted">Accepted</div>
+ </div>
+ <div class="vote-buttons">
+ <button class="vote-btn" data-company="laleham" data-vote="interested">Interested</button>
+ <button class="vote-btn" data-company="laleham" data-vote="pass">Pass</button>
+ <button class="vote-btn" data-company="laleham" data-vote="advisor">Advisor</button>
+ </div>
+ </div>
+
+ <div class="attendee" id="attendee-nhs">
+ <div class="attendee-header">
+ <div>
+ <h4>NHS Supply Chain</h4>
+ <p>Procurement</p>
+ </div>
+ <div class="attendee-status status-pending">Pending</div>
+ </div>
+ <div class="vote-buttons">
+ <button class="vote-btn" disabled data-company="nhs" data-vote="interested">Interested</button>
+ <button class="vote-btn" disabled data-company="nhs" data-vote="pass">Pass</button>
+ <button class="vote-btn" disabled data-company="nhs" data-vote="advisor">Advisor</button>
+ </div>
+ </div>
+
+ <button class="vote-btn" style="width:100%;margin-top:12px;background:var(--text);color:var(--bg);border:none;" onclick="startCall()">
+ Start Call — Join Zoom
+ </button>
+ </div>
+ </div>
+ </div>
+</div>
+
+<script>
+// Load data
+const problem = localStorage.getItem('foundry_problem') || 'Unknown project';
+const slug = localStorage.getItem('foundry_slug') || 'project';
+document.getElementById('projectName').textContent = 
+ problem.split(' ').slice(0, 2).join(' ') + ' Boardroom';
+
+// Mock call date: 7 days from now
+const callDate = new Date();
+callDate.setDate(callDate.getDate() + 7);
+callDate.setHours(14, 0, 0, 0);
+
+// Countdown
+function updateCountdown() {
+ const now = new Date();
+ const diff = callDate - now;
+ if (diff <= 0) {
+ document.getElementById('countdown').textContent = 'Starting now';
+ document.getElementById('liveBadge').style.display = 'flex';
+ document.getElementById('callStatus').textContent = 'Live';
+ return;
+ }
+ const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+ const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+ document.getElementById('countdown').textContent = `${days}d ${hours}h`;
+}
+updateCountdown();
+setInterval(updateCountdown, 60000);
+
+// Attendee count
+document.getElementById('attendeeCount').textContent = '2 of 3';
+
+// Voting logic — for demo only
+const votes = { boots: null, laleham: null, nhs: null };
+document.querySelectorAll('.vote-btn[data-vote]').forEach(btn => {
+ btn.addEventListener('click', function() {
+ if (this.disabled) return;
+ const company = this.dataset.company;
+ const vote = this.dataset.vote;
+ 
+ // Clear other votes for this company
+ document.querySelectorAll(`[data-company="${company}"]`).forEach(b => b.classList.remove('active'));
+ this.classList.add('active');
+ votes[company] = vote;
+ 
+ // Update status
+ const interested = Object.values(votes).filter(v => v === 'interested').length;
+ if (interested >= 2) {
+ document.getElementById('voteStatus').textContent = 'EfFactory Backed';
+ document.getElementById('voteStatus').style.color = 'var(--green)';
+ localStorage.setItem('foundry_status', 'backed');
+ } else if (Object.values(votes).every(v => v)) {
+ document.getElementById('voteStatus').textContent = 'Reviewing';
+ }
+ });
+});
+
+function shareData() {
+ const url = `https://joinfoundry.run/p/${slug}`;
+ navigator.clipboard.writeText(url);
+ alert('Data room link copied');
+}
+
+function startCall() {
+ alert('Zoom link would open here. For MVP: manual calendar invite.');
+}
+</script>
+</body>
+</html>

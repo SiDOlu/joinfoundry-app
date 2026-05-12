@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — JoinFoundry</title>
+<style>
+ :root {
+ --bg: #0a0a0a;
+ --card: #111111;
+ --card-hover: #151515;
+ --border: #1f1f1f;
+ --border-hover: #2a2a2a;
+ --text: #e5e5e5;
+ --text-dim: #a3a3a3;
+ --green: #00ff88;
+ --yellow: #ffaa00;
+ --red: #ff5555;
+ --blue: #3b82f6;
+ --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+ }
+ * { box-sizing: border-box; margin: 0; padding: 0; }
+ body {
+ background: var(--bg);
+ color: var(--text);
+ font-family: var(--font);
+ font-size: 14px;
+ line-height: 1.5;
+ }
+ .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+
+ /* Nav */
+ .nav {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 32px;
+ padding-bottom: 16px;
+ border-bottom: 1px solid var(--border);
+ }
+ .logo { font-size: 16px; font-weight: 600; }
+ .nav-right { display: flex; gap: 16px; align-items: center; }
+ .nav-link {
+ color: var(--text-dim);
+ text-decoration: none;
+ font-size: 13px;
+ }
+ .nav-link:hover { color: var(--text); }
+ .avatar {
+ width: 28px;
+ height: 28px;
+ border-radius: 50%;
+ background: var(--card);
+ border: 1px solid var(--border);
+ }
+
+ /* Header + Controls */
+ .header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 20px;
+ flex-wrap: wrap;
+ gap: 12px;
+ }
+ .header h1 { font-size: 24px; font-weight: 600; }
+ .header-actions { display: flex; gap: 8px; }
+ .btn {
+ background: var(--text);
+ color: var(--bg);
+ border: none;
+ padding: 10px 16px;
+ border-radius: 6px;
+ font-size: 13px;
+ font-weight: 500;
+ cursor: pointer;
+ font-family: var(--font);
+ white-space: nowrap;
+ }
+ .btn-secondary {
+ background: var(--card);
+ color: var(--text);
+ border: 1px solid var(--border);
+ }
+ .btn:hover { opacity: 0.9; }
+ .search {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 6px;
+ padding: 9px 12px;
+ color: var(--text);
+ font-size: 13px;
+ font-family: var(--font);
+ width: 220px;
+ }
+ .search::placeholder { color: var(--text-dim); }
+
+ /* Stats */
+ .stats {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+ gap: 12px;
+ margin-bottom: 24px;
+ }
+ .stat {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ }
+ .stat h3 { color: var(--text-dim); font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+ .stat p { font-size: 28px; font-weight: 600; }
+
+ /* Filter Tabs */
+ .filter-tabs {
+ display: flex;
+ gap: 4px;
+ border-bottom: 1px solid var(--border);
+ margin-bottom: 16px;
+ overflow-x: auto;
+ }
+ .filter-tab {
+ padding: 8px 12px;
+ color: var(--text-dim);
+ cursor: pointer;
+ border-bottom: 2px solid transparent;
+ font-size: 13px;
+ white-space: nowrap;
+ }
+ .filter-tab.active { color: var(--text); border-bottom-color: var(--text); }
+ .filter-count {
+ background: var(--border);
+ padding: 1px 6px;
+ border-radius: 10px;
+ font-size: 11px;
+ margin-left: 6px;
+ }
+
+ /* Project List */
+ .project {
+ background: var(--card);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 16px;
+ margin-bottom: 8px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 16px;
+ cursor: pointer;
+ transition: all 0.15s;
+ }
+ .project:hover { background: var(--card-hover); border-color: var(--border-hover); }
+ .project-left { flex: 1; min-width: 0; }
+ .project-name {
+ font-size: 15px;
+ font-weight: 500;
+ margin-bottom: 4px;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ }
+ .project-desc {
+ color: var(--text-dim);
+ font-size: 13px;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ }
+ .project-meta {
+ display: flex;
+ gap: 12px;
+ margin-top: 6px;
+ font-size: 12px;
+ color: var(--text-dim);
+ }
+ .project-right {
+ display: flex;
+ align-items: center;
+ gap: 16px;
+ flex-shrink: 0;
+ }
+ .score {
+ font-size: 15px;
+ font-weight: 600;
+ min-width: 45px;
+ text-align: right;
+ }
+ .score-high { color: var(--green); }
+ .score-mid { color: var(--yellow); }
+ .score-low { color: var(--red); }
+ .status {
+ font-size: 11px;
+ padding: 4px 10px;
+ border-radius: 12px;
+ font-weight: 500;
+ white-space: nowrap;
+ }
+ .status-draft { background: rgba(163, 163, 163, 0.1); color: var(--text-dim); }
+ .status-inviting { background: rgba(255, 170, 0, 0.1); color: var(--yellow); }
+ .status-boardroom { background: rgba(59, 130, 246, 0.1); color: var(--blue); }
+ .status-backed { background: rgba(0, 255, 136, 0.1); color: var(--green); }
+ .status-killed { background: rgba(255, 85, 85, 0.1); color: var(--red); }
+ .menu-btn {
+ background: transparent;
+ border: none;
+ color: var(--text-dim);
+ cursor: pointer;
+ padding: 4px;
+ font-size: 18px;
+ }
+ .menu-btn:hover { color: var(--text); }
+
+ /* Empty State */
+ .empty {
+ background: var(--card);
+ border: 1px dashed var(--border);
+ border-radius: 8px;
+ padding: 64px 24px;
+ text-align: center;
+ }
+ .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.5; }
+ .empty h3 { font-size: 16px; margin-bottom: 8px; }
+ .empty p { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
+
+ /* Skeleton */
+ .skeleton {
+ background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+ background-size: 200% 100%;
+ animation: loading 1.5s infinite;
+ border-radius: 8px;
+ height: 76px;
+ margin-bottom: 8px;
+ }
+ @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+ /* Mobile */
+ @media (max-width: 640px) {
+ body { font-size: 13px; }
+ .container { padding: 12px; }
+ .nav { margin-bottom: 24px; }
+ .header h1 { font-size: 20px; }
+ .header-actions { width: 100%; }
+ .search { flex: 1; width: auto; }
+ .btn { flex: 1; }
+ .stats { grid-template-columns: 1fr 1fr; }
+ .project {
+ flex-direction: column;
+ align-items: flex-start;
+ gap: 12px;
+ }
+ .project-right {
+ width: 100%;
+ justify-content: space-between;
+ }
+ .project-meta { flex-wrap: wrap; }
+ }
+</style>
+</head>
+<body>
+<div class="container">
+ <!-- Nav -->
+ <div class="nav">
+ <div class="logo">joinfoundry</div>
+ <div class="nav-right">
+ <a href="#" class="nav-link">Docs</a>
+ <a href="#" class="nav-link">Help</a>
+ <div class="avatar"></div>
+ </div>
+ </div>
+
+ <!-- Header -->
+ <div class="header">
+ <h1>Projects</h1>
+ <div class="header-actions">
+ <input type="text" class="search" placeholder="Search projects..." id="searchInput">
+ <button class="btn" onclick="newProject()">+ New Project</button>
+ </div>
+ </div>
+
+ <!-- Stats -->
+ <div class="stats">
+ <div class="stat">
+ <h3>Total Projects</h3>
+ <p id="statTotal">0</p>
+ </div>
+ <div class="stat">
+ <h3>Avg Score</h3>
+ <p id="statAvg">0</p>
+ </div>
+ <div class="stat">
+ <h3>In Boardroom</h3>
+ <p id="statBoardroom">0</p>
+ </div>
+ <div class="stat">
+ <h3>Backed</h3>
+ <p id="statBacked">0</p>
+ </div>
+ </div>
+
+ <!-- Filter Tabs -->
+ <div class="filter-tabs">
+ <div class="filter-tab active" data-filter="all">All <span class="filter-count" id="countAll">0</span></div>
+ <div class="filter-tab" data-filter="inviting">Inviting <span class="filter-count" id="countInviting">0</span></div>
+ <div class="filter-tab" data-filter="boardroom">Boardroom <span class="filter-count" id="countBoardroom">0</span></div>
+ <div class="filter-tab" data-filter="backed">Backed <span class="filter-count" id="countBacked">0</span></div>
+ <div class="filter-tab" data-filter="killed">Killed <span class="filter-count" id="countKilled">0</span></div>
+ </div>
+
+ <!-- Project List -->
+ <div id="projectList">
+ <div class="skeleton"></div>
+ <div class="skeleton"></div>
+ </div>
+</div>
+
+<script>
+// State
+let allProjects = [];
+let currentFilter = 'all';
+let searchTerm = '';
+
+// Load projects — localStorage for MVP, API later
+function loadProjects() {
+ const projects = [];
+ 
+ // Current project from flow
+ const problem = localStorage.getItem('foundry_problem');
+ const slug = localStorage.getItem('foundry_slug');
+ const status = localStorage.getItem('foundry_status') || 'inviting';
+ 
+ if (problem && slug) {
+ projects.push({
+ id: slug,
+ name: problem.split(' ').slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+ desc: problem,
+ score: 87,
+ status: status,
+ created: new Date().toISOString(),
+ updated: new Date().toISOString()
+ });
+ }
+
+ // Mock data for demo
+ projects.push(
+ {
+ id: 'nhs-burnout-ai',
+ name: 'NHS Burnout AI',
+ desc: 'Roster data predicts NHS staff burnout 2 weeks early using FHIR integration',
+ score: 82,
+ status: 'boardroom',
+ created: '2025-09-01',
+ updated: '2025-09-15'
+ },
+ {
+ id: 'fintech-kyc',
+ name: 'Fintech KYC',
+ desc: 'SME invoice finance using HMRC + Companies House real-time data',
+ score: 64,
+ status: 'killed',
+ created: '2025-08-15',
+ updated: '2025-08-20'
+ },
+ {
+ id: 'beauty-led',
+ name: 'Beauty LED',
+ desc: 'Affordable LED mask for high street. £89 vs CurrentBody £279',
+ score: 91,
+ status: 'backed',
+ created: '2025-08-01',
+ updated: '2025-09-10'
+ }
+ );
+ 
+ return projects;
+}
+
+// Render
+function renderProjects() {
+ const list = document.getElementById('projectList');
+ 
+ // Filter
+ let filtered = allProjects;
+ if (currentFilter !== 'all') {
+ filtered = allProjects.filter(p => p.status === currentFilter);
+ }
+ if (searchTerm) {
+ filtered = filtered.filter(p => 
+ p.name.toLowerCase().includes(searchTerm) || 
+ p.desc.toLowerCase().includes(searchTerm)
+ );
+ }
+
+ // Update stats
+ document.getElementById('statTotal').textContent = allProjects.length;
+ const avgScore = allProjects.length? 
+ Math.round(allProjects.reduce((sum, p) => sum + p.score, 0) / allProjects.length) : 0;
+ document.getElementById('statAvg').textContent = avgScore;
+ document.getElementById('statBoardroom').textContent = allProjects.filter(p => p.status === 'boardroom').length;
+ document.getElementById('statBacked').textContent = allProjects.filter(p => p.status === 'backed').length;
+
+ // Update filter counts
+ document.getElementById('countAll').textContent = allProjects.length;
+ document.getElementById('countInviting').textContent = allProjects.filter(p => p.status === 'inviting').length;
+ document.getElementById('countBoardroom').textContent = allProjects.filter(p => p.status === 'boardroom').length;
+ document.getElementById('countBacked').textContent = allProjects.filter(p => p.status === 'backed').length;
+ document.getElementById('countKilled').textContent = allProjects.filter(p => p.status === 'killed').length;
+
+ // Render list
+ if (filtered.length === 0) {
+ list.innerHTML = `
+ <div class="empty">
+ <div class="empty-icon"> </div>
+ <h3>No projects found</h3>
+ <p>${searchTerm? 'Try a different search term' : 'Create your first project to get a Viability Score in 60 seconds'}</p>
+ ${!searchTerm? '<button class="btn" onclick="newProject()">+ New Project</button>' : ''}
+ </div>
+ `;
+ return;
+ }
+
+ list.innerHTML = filtered.map(p => {
+ const scoreClass = p.score >= 80? 'score-high' : p.score >= 60? 'score-mid' : 'score-low';
+ const statusLabels = {
+ draft: 'Draft',
+ inviting: 'Inviting',
+ boardroom: 'Boardroom',
+ backed: 'Backed',
+ killed: 'Killed'
+ };
+ const timeAgo = getTimeAgo(p.updated);
+ 
+ return `
+ <div class="project" onclick="openProject('${p.id}', '${p.status}')">
+ <div class="project-left">
+ <div class="project-name">${p.name}</div>
+ <div class="project-desc">${p.desc}</div>
+ <div class="project-meta">
+ <span>Updated ${timeAgo}</span>
+ </div>
+ </div>
+ <div class="project-right">
+ <div class="score ${scoreClass}">${p.score}</div>
+ <div class="status status-${p.status}">${statusLabels[p.status]}</div>
+ <button class="menu-btn" onclick="event.stopPropagation();deleteProject('${p.id}')">⋯</button>
+ </div>
+ </div>
+ `;
+ }).join('');
+}
+
+function getTimeAgo(dateStr) {
+ const date = new Date(dateStr);
+ const seconds = Math.floor((new Date() - date) / 1000);
+ if (seconds < 60) return 'just now';
+ const minutes = Math.floor(seconds / 60);
+ if (minutes < 60) return `${minutes}m ago`;
+ const hours = Math.floor(minutes / 60);
+ if (hours < 24) return `${hours}h ago`;
+ const days = Math.floor(hours / 24);
+ return `${days}d ago`;
+}
+
+function openProject(id, status) {
+ if (status === 'boardroom' || status === 'backed') {
+ window.location.href = 'boardroom.html';
+ } else {
+ window.location.href = 'dataroom.html';
+ }
+}
+
+function newProject() {
+ localStorage.removeItem('foundry_problem');
+ localStorage.removeItem('foundry_slug');
+ localStorage.removeItem('foundry_status');
+ window.location.href = 'index.html';
+}
+
+function deleteProject(id) {
+ if (confirm('Delete this project? This cannot be undone.')) {
+ if (id === localStorage.getItem('foundry_slug')) {
+ localStorage.removeItem('foundry_problem');
+ localStorage.removeItem('foundry_slug');
+ localStorage.removeItem('foundry_status');
+ }
+ init();
+ }
+}
+
+// Event listeners
+document.querySelectorAll('.filter-tab').forEach(tab => {
+ tab.addEventListener('click', () => {
+ document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+ tab.classList.add('active');
+ currentFilter = tab.dataset.filter;
+ renderProjects();
+ });
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+ searchTerm = e.target.value.toLowerCase();
+ renderProjects();
+});
+
+// Init with skeleton
+function init() {
+ setTimeout(() => {
+ allProjects = loadProjects();
+ renderProjects();
+ }, 400); // Fake load
+}
+
+init();
+</script>
+</body>
+</html>
