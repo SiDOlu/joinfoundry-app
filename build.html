@@ -74,16 +74,16 @@
 </div>
 
 <script>
-// Authentication token bound to your platform testing account
-// Supports both Standard API Keys (AIzaSy...) and OAuth/Access Tokens (AQ.A...)
-const GEMINI_API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow"; 
+// Always set apiKey to empty string for the runtime environment injection
+const apiKey = ""; 
+
+// Fallback to your testing Service Account OAuth Access Token if running stand-alone
+const FALLBACK_API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow"; 
 
 const logs = document.getElementById('logs');
 const problem = localStorage.getItem('foundry_problem') || 'UK nurses get toe blisters. 12h shifts. £2B anti-chafe market. I think a toe-gap applicator solves it.';
 const slug = localStorage.getItem('foundry_slug') || 'toe-gap-applicator';
 document.getElementById('slug').textContent = slug;
-
-let accumulatedFullText = ""; // Reconstruct entire response for parsing
 
 function appendLog(text, className = '') {
     const div = document.createElement('div');
@@ -190,14 +190,17 @@ function parseStreamToDataroom(text) {
     };
 }
 
-async function streamBuildAnalysis() {
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
-        appendLog('[CRITICAL ERROR] API Key Missing. Please assign GEMINI_API_KEY in script header.', 'error');
+async function runBuildAnalysis() {
+    const activeKey = apiKey || FALLBACK_API_KEY;
+
+    if (!activeKey) {
+        appendLog('[CRITICAL ERROR] API Key Missing. Please assign activeKey in script header.', 'error');
         appendLog('[!] Process aborted. Real-time telemetry could not initialize without valid authorization.', 'error');
         return;
     }
 
     appendLog('[0/6] Initializing secure telemetry connection to Gemini API...', 'dim');
+    await delay(300);
 
     const systemPrompt = `You are the back-end engine of JoinFoundry. Analyze the user's business idea and output exactly 6 sections matching this format layout precisely:
 
@@ -236,19 +239,18 @@ async function streamBuildAnalysis() {
     Make terms highly specific to the idea input. Do not use markdown styling. Print the ✓ symbol clearly.`;
 
     try {
-        // Adaptively handle Standard API Keys vs OAuth/Service Account Access Tokens
-        // Standard keys start with "AIzaSy", while Service Account access tokens start with OAuth prefixes like "AQ.A" or "ya29"
-        const isStandardApiKey = GEMINI_API_KEY.startsWith("AIzaSy");
+        // Adaptively handle standard API keys vs OAuth/Service Account Tokens starting with "AQ.A"
+        const isStandardApiKey = activeKey.startsWith("AIzaSy");
         
         const url = isStandardApiKey
-            ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${GEMINI_API_KEY}`
-            : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent`;
+            ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`
+            : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
 
         const headers = { 'Content-Type': 'application/json' };
         
-        // If it's a Service Account Access Token, pass it via Bearer header
+        // Pass Service Account tokens via secure Authorization header
         if (!isStandardApiKey) {
-            headers['Authorization'] = `Bearer ${GEMINI_API_KEY}`;
+            headers['Authorization'] = `Bearer ${activeKey}`;
         }
 
         const response = await fetch(url, {
@@ -265,70 +267,51 @@ async function streamBuildAnalysis() {
             throw new Error(`API call rejected by gateway. Status: ${response.status}. Details: ${errorDetails}`);
         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let buffer = "";
+        const result = await response.json();
+        const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            
-            const lines = buffer.split("\n");
-            buffer = lines.pop(); 
-
-            for (const line of lines) {
-                if (line.trim().startsWith('"text":')) {
-                    let cleanedText = line.replace('"text":', '').replace(/"/g, '').replace(/\\n/g, '\n').trim();
-                    if (cleanedText) {
-                        processLogLine(cleanedText);
-                        accumulatedFullText += cleanedText + "\n";
-                    }
-                }
-            }
+        if (!textResponse) {
+            throw new Error("Empty reasoning payload returned from synthesis cluster.");
         }
 
-        // Process final accumulated text into structured data
-        const compiledData = parseStreamToDataroom(accumulatedFullText);
+        // Output lines with a staggered visual delay to preserve the terminal experience
+        const lines = textResponse.split('\n');
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+
+            let cssClass = '';
+            if (trimmed.startsWith('✓') || trimmed.includes('Build complete.')) {
+                cssClass = 'success';
+            } else if (trimmed.startsWith('[')) {
+                cssClass = 'dim';
+            }
+
+            appendLog(trimmed, cssClass);
+            await delay(180 + Math.random() * 120); // Simulates organic console typing speed
+        }
+
+        // Reconstruct full output text for validation parsing
+        const compiledData = parseStreamToDataroom(textResponse);
         
         if (compiledData) {
             localStorage.setItem('foundry_dataroom', JSON.stringify(compiledData));
             completeProcess(true);
         } else {
-            // Strict check failed (empty or parsed out with zero valid metrics)
-            appendLog('\n[!] Validation Failed: Stream payload returned empty or unreadable metrics.', 'error');
+            appendLog('\n[!] Validation Failed: Generated payload returned empty or unreadable metrics.', 'error');
             appendLog('[!] Entry to Data Room blocked. Please check your setup or prompt formulation and retry.', 'error');
             completeProcess(false);
         }
 
     } catch (err) {
-        appendLog(`\n[CRITICAL ERROR] Stream Exception: ${err.message}`, 'error');
+        appendLog(`\n[CRITICAL ERROR] Generation Exception: ${err.message}`, 'error');
         appendLog('[!] Build failed. Verify your network, API Key, or Service Account Token configuration.', 'error');
         completeProcess(false);
     }
 }
 
-// Staggers lines into terminal visualization
-function processLogLine(text) {
-    const segments = text.split('\n');
-    segments.forEach(seg => {
-        let trimmed = seg.trim();
-        if (!trimmed) return;
-
-        let cssClass = '';
-        if (trimmed.startsWith('✓') || trimmed.includes('Build complete.')) {
-            cssClass = 'success';
-        } else if (trimmed.startsWith('[')) {
-            cssClass = 'dim';
-        }
-        
-        setTimeout(() => appendLog(trimmed, cssClass), Math.random() * 200);
-    });
-}
-
 async function completeProcess(isValid) {
-    await delay(2000);
+    await delay(1000);
     appendLog('<br>$ joinfoundry deploy --boardroom', 'dim');
     await delay(400);
     appendLog('> _<span class="cursor"></span>', 'success');
@@ -358,7 +341,7 @@ async function completeProcess(isValid) {
 
 // Start analysis automatically on window mount
 window.onload = function() {
-    streamBuildAnalysis();
+    runBuildAnalysis();
 };
 </script>
 </body>
