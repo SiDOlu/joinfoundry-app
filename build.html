@@ -54,8 +54,8 @@ const problem = localStorage.getItem('foundry_problem') || 'UK nurses get toe bl
 const slug = localStorage.getItem('foundry_slug') || 'toe-gap-applicator';
 document.getElementById('slug').textContent = slug;
 
-// Set empty API key. The preview system handles injecting this key at runtime.
-const apiKey = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow";
+// Insert your Gemini / Service Account Bound Access Token here
+const GEMINI_API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow";
 
 function appendLog(text, className = '') {
     const div = document.createElement('div');
@@ -65,10 +65,9 @@ function appendLog(text, className = '') {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
-// Safe navigation helper that prevents SyntaxError when resolving relative URLs in empty base frames
+// Safe navigation helper that prevents base-resolution errors inside sandboxed iframes
 function safeNavigate(target) {
     try {
-        // Only resolve using URL constructor if current href has a valid protocol and base
         if (window.location.href && window.location.href !== "about:blank" && window.location.href !== "about:srcdoc") {
             window.location.href = new URL(target, window.location.href).href;
         } else {
@@ -81,7 +80,6 @@ function safeNavigate(target) {
     }
 }
 
-// Stagger log execution to mimic a processing terminal
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -91,22 +89,21 @@ async function fetchWithRetry(url, options, retries = 5, delayMs = 1000) {
     try {
         const response = await fetch(url, options);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
         return await response.json();
     } catch (error) {
         if (retries <= 0) {
             throw error;
         }
-        // Exponential backoff: 1s, 2s, 4s, 8s, 16s
         await delay(delayMs);
         return fetchWithRetry(url, options, retries - 1, delayMs * 2);
     }
 }
 
-// Robust fallback values if the API fails or is offline
 function triggerFallback() {
-    appendLog('\n[!] Network latency detected. Running local verification fallback...', 'warning');
+    appendLog('\n[!] Gateway unavailable. Running offline local validation fallback...', 'warning');
     
     const fallbackData = {
         total: 82,
@@ -211,12 +208,18 @@ function triggerFallback() {
 
 async function runSynthesis() {
     await delay(300);
-    appendLog('[1/7] Parsing neural concept vectors...', 'dim');
+    appendLog('[1/7] Sifting neural concept vectors...', 'dim');
     await delay(400);
-    appendLog('[2/7] Opening secure Gemini reasoning gateway...', 'dim');
+    appendLog('[2/7] Negotiating secure credential handshake...', 'dim');
     await delay(300);
 
-    // Define JSON schema strictly matching dataroom.html's expected 7 pillars
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_")) {
+        appendLog('[CRITICAL ERROR] Gemini API Authorization Token is undefined.', 'error');
+        triggerFallback();
+        return;
+    }
+
+    // Dynamic schema validation criteria for 7 data room pillars
     const schema = {
         type: "OBJECT",
         properties: {
@@ -238,7 +241,7 @@ async function runSynthesis() {
                             }
                         },
                         source: { type: "STRING" },
-                        terminalLog: { type: "STRING" } // Tailored log line to output to build terminal
+                        terminalLog: { type: "STRING" }
                     },
                     required: ["title", "icon", "score", "max", "metrics", "source", "terminalLog"]
                 }
@@ -247,8 +250,8 @@ async function runSynthesis() {
         required: ["total", "pillars"]
     };
 
-    const systemPrompt = `You are the core synthesis engine of JoinFoundry. Analyze the user's startup idea or business problem and output a structured diligence report.
-    You MUST output exactly 7 pillars in the JSON schema, matching these titles and icons precisely:
+    const systemPrompt = `You are the synthesis engine of JoinFoundry. Analyze the user's venture idea and build a structured report.
+    You MUST output exactly 7 pillars in the JSON schema, matching these titles and icons:
     1. 'Market Demand' (📈)
     2. 'White Space' (🔍)
     3. 'Regulatory Path' (⚖️)
@@ -258,20 +261,30 @@ async function runSynthesis() {
     7. 'Exit Comps & Valuation' (💰)
 
     For each pillar:
-    - Provide a realistic score out of 20 (max: 20).
-    - Under metrics, output exactly 3 specific data metrics as key-value pairs (e.g. [["Metric Name", "Metric Value"], ...]). Make these highly specific to the user's business idea. Do not output generic values.
-    - Provide a plausible professional data source.
-    - Write a short, UNIX terminal-style log string for "terminalLog" summarizing the discovery (e.g., " ✓ Detected 22,000 searches for toe comfort, growing 14% YoY"). Keep it technical and concise.
+    - Provide a score out of 20.
+    - Under metrics, output exactly 3 key-value arrays (e.g., [["Monthly Searches", "45,000"], ...]) customized to the venture.
+    - Write a short terminal log sentence for "terminalLog" (e.g., " ✓ Found 12 candidate manufacturers in UK region").`;
+
+    // DETECT CREDENTIAL TYPE:
+    // AI Studio API keys begin with 'AIzaSy'. Anything else is processed as an OAuth Bearer Token.
+    const isStandardApiKey = GEMINI_API_KEY.startsWith("AIzaSy");
     
-    Calculate the correct total sum of the 7 scores as "total". Let's run.`;
+    const url = isStandardApiKey
+        ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`
+        : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
 
-    const userQuery = `Analyze this venture idea: "${problem}"`;
+    const headers = { 
+        'Content-Type': 'application/json' 
+    };
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    // Bind token to Bearer Authorization Header if it's a service account token
+    if (!isStandardApiKey) {
+        headers['Authorization'] = `Bearer ${GEMINI_API_KEY}`;
+    }
 
     try {
         const payload = {
-            contents: [{ parts: [{ text: userQuery }] }],
+            contents: [{ parts: [{ text: `Venture Idea: "${problem}"` }] }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
             generationConfig: {
                 responseMimeType: "application/json",
@@ -281,34 +294,34 @@ async function runSynthesis() {
 
         const result = await fetchWithRetry(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify(payload)
         });
 
         const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!rawText) {
-            throw new Error("Empty candidate payload returned from synthesis gateway.");
+            throw new Error("Invalid response format received from model gateway.");
         }
 
         const data = JSON.parse(rawText);
 
-        // Print custom terminal logs from Gemini to preserve UNIX theme
+        // Step-by-step terminal execution stream
         for (let idx = 0; idx < data.pillars.length; idx++) {
             const pillar = data.pillars[idx];
-            appendLog(`[${idx + 1}/7] Sifting ${pillar.title.toLowerCase()} vectors...`, 'dim');
-            await delay(500);
-            appendLog(pillar.terminalLog || ` ✓ Verified data metrics for ${pillar.title}`, 'success');
-            await delay(300);
+            appendLog(`[${idx + 1}/7] Structuring ${pillar.title.toLowerCase()} dataset...`, 'dim');
+            await delay(450);
+            appendLog(pillar.terminalLog || ` ✓ Diligence metrics mapped for ${pillar.title}`, 'success');
+            await delay(250);
         }
 
-        // Save generated payload to let dataroom.html read it instantly
         localStorage.setItem('foundry_dataroom', JSON.stringify(data));
         
         appendLog(`\nBuild complete. Dynamic Viability Score: ${data.total}/140`, 'success');
         completeProcess();
 
     } catch (err) {
-        console.error("API compilation exception", err);
+        console.error("Diligence mapping error:", err);
+        appendLog(`\n[!] Credentials mismatch. Error details: ${err.message}`, 'error');
         triggerFallback();
     }
 }
@@ -322,7 +335,6 @@ async function completeProcess() {
     safeNavigate('dataroom.html');
 }
 
-// Fire up the synthesis on window mount
 window.onload = function() {
     runSynthesis();
 };
