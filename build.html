@@ -78,6 +78,7 @@
 <script>
 // Service Account details to generate short-lived credentials securely at runtime
 const CLIENT_EMAIL = "joinfoundryv2@joinfoundry.iam.gserviceaccount.com";
+const PROJECT_ID = "joinfoundry";
 const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaRQ+dJUinnxAE\nCOAoQfV44LUb1uTnB1V0b9VAJ9T+aSuxeytaluLJv1eGD71vUySTrY0XNd8j8LaP\nDGsk8EJVwmrndvFul2u7yGZ2NlicjWWODPJlDNq58aDO3xCnh91Eq80xzAD2cUCJ\ngxCnvkYd7R4lymnIjiGWOujJ7ACoI4PR4LC4aHI4avrlC6JK1uUbmvuHJZlq1vVf\n0eTsvXO9IUm2YBAGqm0iaZ5np40Y6hiDA9Enb7VmXc/cZWST3HtHOeezpSzARP12\nTUqnH9a3YulZ7GuK1qJWlUbnNgaVxnMibnT8pqwiMY7XD7fo6sT+MnjKlF72eH/C\n7AsujPc9AgMBAAECggEAMzzgB/M/JX4s+817lWe6cJhLW5AsJuGtWUqBZHCVSu20\nYJL53+eosFR2/tUGErKRVQt6Ifc2/RBeQqFXK5Is+EXN460jyuLH2wqVpu1mCsYU\nj26RnlAQrnK+3aE2nyVBN4QfBLAPj8qRLFa0m7QKcK7/kz57a6WV09bbW79HfjB8\nxfKsPqG38mscSY53OIEPPG3ASePmsOszAVnhaFwUTBUhwT3+j0td37HaSzRh6sKl\n3V79EJomsJoPX+T1QePoRLGMpiOUG+7qpFVhYAS43lHpW/Qeaun5V+7pHFd3AMAh\n1ETdMCibA5W8Yp3aLWzZEfBvks8gXyNaEcZj0ii77wKBgQD/65Z9Sai5bFTNP6PW\nONnpJFQLUyMzmR5VwJ/D1AZoh0ZQW05QaJmMrxrikPXC4xPO135xL2TI9dCxim7L\nBYQJfUlhm06Q7Ga9jG43Ug2CIHBK16AOMsL2n8EQ/IzbWj3PexZ2To9YQkY1LE67\nB3sn4Rlik9WpWEPx7wxdkC532wKBgQDaVnhbfzkm4K+nstrTYlSVCeOo4ZiS0S6l\nFlltz9TcO4wnCPRZRH5Mptz7Zyk/UBPURgsrvgxZi3RETVCtufTeChtdzmLEvLaH\nR2WXP6MzhEXZoBFehEIXqQNvPvmePtnoh1/1NiCo7XGPyp2hh6/i46Xai+5FsS38\nbJKQ9qkkxwKBgArqFjnzqUF3MEqsmyUouYpq5Taybf7mWdfYZjfo0/kjQ8lri3R8\ncYgBc8kT25dbLd4VbKwRFGBJs4PO3pjD/HSXJkkGYZxmqJ8O3Sh41GCnV4KpnYbd\nfVkdSRObYbp9J8OwgS28ffqKoQnlgNoTIJp7zCRbH7KgNA2eX02iN4kfAoGAO5/L\nhGkMyXIoZepw2bMLmBu4QQFCci2PyGN/Dn7oCTB1yJ8oY0xSFUqoJDt6xyBuGdT6\n7fobU0TC/ngCpT6YAR7PdGGNFV7Xlb/InXIydjoT/Sc6Nw51IhL0rieLcUyGo3p8\nmPEsIBWfon3ZaCguvw4d173I1t1Yyos3x0Ck1jcCgYEAxhxRrZKK9ZieC/Zz0Lmc\n3EQ4ONDVa0lvl3A+JUqJhc4cRigPAMuw7X7Imi7mNSZC3nV1NU1ErMyv6ilZW60s\nrKOpKxd3aZFlINSscYvxlhj1wY9VnqL/fk42DC9eKTXDXRhG4QRCdnv1T/RgtcaX\nv2cn7Ma9l7qlNHmcv6dsfrQ=\n-----END PRIVATE KEY-----\n`;
 
 const logs = document.getElementById('logs');
@@ -300,7 +301,8 @@ async function runBuildAnalysis() {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${activeToken}`
+                'Authorization': `Bearer ${activeToken}`,
+                'x-goog-user-project': PROJECT_ID
             },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `Analyze this venture: "${problem}"` }] }],
