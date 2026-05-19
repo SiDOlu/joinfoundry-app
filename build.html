@@ -235,18 +235,33 @@ async function streamBuildAnalysis() {
     Make terms highly specific to the idea input. Do not use markdown styling. Print the ✓ symbol clearly.`;
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${GEMINI_API_KEY}`;
+        // Adaptively handle Standard API Keys vs OAuth/Service Account Access Tokens
+        const isStandardApiKey = GEMINI_API_KEY.startsWith("AIzaSyAHObN4LWCZKzLLmIrrLDVdh2hxmrvd2mE");
         
+        const url = isStandardApiKey
+            ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${GEMINI_API_KEY}`
+            : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent`;
+
+        const headers = { 'Content-Type': 'application/json' };
+        
+        // If it's an access token/service account credential, pass it via Bearer header
+        if (!isStandardApiKey) {
+            headers['Authorization'] = `Bearer ${GEMINI_API_KEY}`;
+        }
+
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `Analyze this venture: "${problem}"` }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             })
         });
 
-        if (!response.ok) throw new Error("Build rejected joinfoundry engine.");
+        if (!response.ok) {
+            const errorDetails = await response.text();
+            throw new Error(`API call rejected by gateway. Status: ${response.status}. Details: ${errorDetails}`);
+        }
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -287,7 +302,7 @@ async function streamBuildAnalysis() {
 
     } catch (err) {
         appendLog(`\n[CRITICAL ERROR] Stream Exception: ${err.message}`, 'error');
-        appendLog('[!] Build failed. Verify your network.', 'error');
+        appendLog('[!] Build failed. Verify your network, API Key, or Service Account Token configuration.', 'error');
         completeProcess(false);
     }
 }
@@ -334,7 +349,7 @@ async function completeProcess(isValid) {
         logs.appendChild(actionContainer);
     } else {
         // Redirection block notification
-        appendLog('<span class="error">[NO DATA FETCHED] Fetch failed. Build halted.</span>', 'error');
+        appendLog('<span class="error">[SYSTEM BLOCK] Redirection credentials missing. Build halted.</span>', 'error');
     }
     window.scrollTo(0, document.body.scrollHeight);
 }
