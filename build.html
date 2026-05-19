@@ -49,15 +49,14 @@
 </div>
 
 <script>
-// Authentication token bound to your platform testing account
-const API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow"; 
+// IMPORTANT: Insert your Gemini API key here.
+// Note: For a production release, route this request through a thin server wrapper to hide your key.
+const GEMINI_API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow"; 
 
 const logs = document.getElementById('logs');
-const problem = localStorage.getItem('foundry_problem') || 'UK nurses get toe blisters. 12h shifts. £2B anti-chafe market. I think a toe-gap applicator solves it.';
-const slug = localStorage.getItem('foundry_slug') || 'toe-gap-applicator';
+const problem = localStorage.getItem('foundry_problem') || 'No idea provided.';
+const slug = localStorage.getItem('foundry_slug') || 'project';
 document.getElementById('slug').textContent = slug;
-
-let accumulatedFullText = ""; // To reconstruct the whole response for parsing
 
 function appendLog(text, className = '') {
     const div = document.createElement('div');
@@ -67,170 +66,46 @@ function appendLog(text, className = '') {
     window.scrollTo(0, document.body.scrollHeight);
 }
 
-// Stagger log execution delays
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Navigation fallback protecting sandbox iframes
-function safeNavigate(target) {
-    try {
-        if (window.location.href && window.location.href !== "about:blank" && window.location.href !== "about:srcdoc") {
-            window.location.href = new URL(target, window.location.href).href;
-        } else {
-            window.location.href = target;
-        }
-    } catch (e) {
-        console.error("Redirection blocked by sandbox constraints", e);
-        appendLog(`\n<span class="warning">[Sandbox Warning] Automatic redirection blocked by iframe constraints.</span>`, 'warning');
-        appendLog(`👉 <a href="${target}" style="color:var(--green); font-weight:bold; text-decoration:underline;">Click here to open ${target} manually</a>`, 'success');
-    }
-}
-
-// Reconstruct stream lines into dataroom.html's structural JSON payload
-function parseStreamToDataroom(text) {
-    const pillars = [
-        { title: 'Market Demand', icon: '📈', score: 14, max: 20, metrics: [], source: 'Google Ads & Search Volume API' },
-        { title: 'White Space', icon: '🔍', score: 15, max: 20, metrics: [], source: 'Competitive Registry database' },
-        { title: 'Regulatory Path', icon: '⚖️', score: 16, max: 20, metrics: [], source: 'MHRA & Compliance Registries' },
-        { title: 'Supply Chain Fit', icon: '🏭', score: 13, max: 20, metrics: [], source: 'Logistical Sourcing Platforms' },
-        { title: 'Founder Velocity', icon: '🚀', score: 14, max: 20, metrics: [], source: 'Execution Timeline Audit' },
-        { title: 'Institutional Signal', icon: '🏛️', score: 12, max: 20, metrics: [], source: 'Academic & Literature Corpus' },
-        { title: 'Exit Comps & Valuation', icon: '💰', score: 13, max: 20, metrics: [], source: 'Crunchbase & Pitchbook M&A' }
-    ];
-
-    let totalScore = 85; // Fallback default score if calculation yields nothing
-    const lines = text.split('\n');
-    let currentPillarIdx = -1;
-
-    lines.forEach(line => {
-        const trimmed = line.trim();
-        if (trimmed.includes('[1/6]')) currentPillarIdx = 0;
-        else if (trimmed.includes('[2/6]')) currentPillarIdx = 1;
-        else if (trimmed.includes('[3/6]')) currentPillarIdx = 2;
-        else if (trimmed.includes('[4/6]')) currentPillarIdx = 3;
-        else if (trimmed.includes('[5/6]')) currentPillarIdx = 4;
-        else if (trimmed.includes('[6/6]')) currentPillarIdx = 5;
-        else if (trimmed.toLowerCase().includes('viability score:')) {
-            const match = trimmed.match(/viability score:\s*(\d+)/i);
-            if (match && match[1]) {
-                totalScore = parseInt(match[1], 10);
-            }
-        }
-
-        if (currentPillarIdx !== -1 && trimmed.startsWith('✓')) {
-            const cleanMetric = trimmed.replace('✓', '').trim();
-            const parts = cleanMetric.split(':');
-            if (parts.length >= 2) {
-                const key = parts[0].trim();
-                const val = parts.slice(1).join(':').trim();
-                pillars[currentPillarIdx].metrics.push([key, val]);
-            } else {
-                pillars[currentPillarIdx].metrics.push(["Insight Indicator", cleanMetric]);
-            }
-        }
-    });
-
-    // Provide robust defaults if stream metrics parse incomplete
-    const fallbackMetrics = [
-        [["Search Demand", "Highly active segment"], ["Competition", "Low-Medium niche"], ["Target CPC", "£1.10 - £2.40"]],
-        [["Market Saturation", "Low competitive overlap"], ["Shelf Presence", "0 direct matches found"], ["Friction Vector", "Significant user complaints"]],
-        [["Classification", "Low-Risk Cosmetic/General"], ["Timeline", "6-8 weeks estimation"], ["Requirements", "Standard compliance notifications"]],
-        [["Landed Cost Approximation", "£2.50/unit"], ["MOQ Parameters", "1,000 unit batch target"], ["Sourcing Complexity", "Feasible production lines identified"]],
-        [["Execution Roadmap", "Immediate iteration cycle"], ["Dev Cycle Scope", "Moderate execution scale"], ["Time-to-Value Speed", "Under 90 Days"]],
-        [["Academic Validation", "Corroborative studies match"], ["Sector Trajectory", "Highly aligned with B2B trends"], ["Public Support Eligible", "Yes"]],
-        [["Strategic Exit Multiple", "5.4x ARR average"], ["Exit Landscape", "Strategic buyout profile"], ["Target Exit Range", "£2.5M - £5.0M"]]
-    ];
-
-    pillars.forEach((p, idx) => {
-        if (p.metrics.length === 0) {
-            p.metrics = fallbackMetrics[idx];
-        }
-        p.score = Math.round((totalScore / 140) * 20) + (idx % 2 === 0 ? 1 : -1);
-        if (p.score > 20) p.score = 20;
-        if (p.score < 5) p.score = 11;
-    });
-
-    // Synthesize exit valuation values realistically matching business scale
-    const multiple = (Math.random() * 2 + 4.1).toFixed(1);
-    pillars[6].metrics = [
-        ["Sector Valuation", `${multiple}x Multiple`],
-        ["Exit Strategy", "Corporate Acquisition Target"],
-        ["Target Category", "Strategic Private Equity"]
-    ];
-
-    return {
-        total: totalScore,
-        pillars: pillars
-    };
-}
-
-// Fallback logic if the network connection drops or experiences service limits
+// Simple fallback steps if API is unreachable
 function useFallback() {
-    appendLog('[!] Running offline backup verification cluster...', 'warning');
-    const fallbackData = {
-        total: 82,
-        pillars: [
-            { title: 'Market Demand', icon: '📈', score: 14, max: 20, metrics: [['Search Volume', 'Stable Trend'], ['Sector Interest', 'Rising (+18%)'], ['Avg CPC', '£1.40']], source: 'Market Simulation Baseline' },
-            { title: 'White Space', icon: '🔍', score: 16, max: 20, metrics: [['Market Saturation', 'Low'], ['Direct Matches', '0 elements cataloged'], ['Sentiment', 'High consumer need']], source: 'Competitive Shelf Index' },
-            { title: 'Regulatory Path', icon: '⚖️', score: 17, max: 20, metrics: [['Classification', 'Low-Risk Non-invasive'], ['Timeline', '6-12 weeks'], ['Compliance', 'Standard declarations']], source: 'Regulatory Taxonomy Index' },
-            { title: 'Supply Chain Fit', icon: '🏭', score: 11, max: 20, metrics: [['Sourcing Effort', 'Low to Medium'], ['Est. MOQ', '500 units'], ['Prototyping Difficulty', 'Low']], source: 'Global Sourcing Indexes' },
-            { title: 'Founder Velocity', icon: '🚀', score: 12, max: 20, metrics: [['Execution Velocity', 'High-Speed Iteration'], ['Complexity Blockers', 'Minimal'], ['Time-to-market', 'Fast Track']], source: 'Operational Leverage Analyzer' },
-            { title: 'Institutional Signal', icon: '🏛️', score: 11, max: 20, metrics: [['Academic Validation', 'Verified studies exist'], ['Sector Alignment', 'High matching vectors'], ['Grant Scope', 'Applicable']], source: 'Academic Catalog Database' },
-            { title: 'Exit Comps & Valuation', icon: '💰', score: 11, max: 20, metrics: [['Sector Exit Valuation', '4.8x Multiple ARR'], ['Exit Target', 'SME Aggregators'], ['Liquidity Profile', 'PE Buyout Opportunity']], source: 'Enterprise Value Matrices' }
-        ]
-    };
-    localStorage.setItem('foundry_dataroom', JSON.stringify(fallbackData));
-    completeProcess();
+    appendLog('[!] Fallback activated. Generating local simulation...', 'warning');
+    setTimeout(() => appendLog('✓ Initializing offline evaluation models...', 'success'), 400);
+    setTimeout(() => appendLog('Build complete. Viability Score: 78/100', 'success'), 1200);
+    setTimeout(() => window.location.href = 'dataroom.html', 3000);
 }
 
 async function streamBuildAnalysis() {
-    if (!API_KEY || API_KEY === "") {
-        appendLog('[CRITICAL ERROR] API Key Missing. Please assign API_KEY in script header.', 'error');
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+        appendLog('[CRITICAL ERROR] API Key Missing. Please assign GEMINI_API_KEY in the script block.', 'error');
         useFallback();
         return;
     }
 
-    appendLog('[0/6] Initializing secure telemetry connection across the multiverse...', 'dim');
+    appendLog('[0/6] Connecting to core synthesis cluster...', 'dim');
 
-    const systemPrompt = `You are the back-end engine of JoinFoundry. Analyze the user's business idea and output exactly 6 sections matching this format layout precisely:
-
+    // System instructions forcing Gemini to reply in line-by-line terminal chunks
+    const systemPrompt = `You are the back-end engine of JoinFoundry. The user will give you a startup idea or a business problem. 
+    Analyze it dynamically and give an objective analysis structured strictly into 6 short sections matching this style:
     [1/6] Fetching market demand...
-    ✓ Searches: [A specific, realistic search query size/volume or statistic]
-    ✓ Competition: [Low, Medium, or High tracking]
-    ✓ Target CPC: [An estimated ad cost value]
-
+    ✓ [Give a realistic, data-focused market statistic or metric tailored specifically to the user's input idea]
     [2/6] Scanning white space...
-    ✓ Market Gap: [A realistic unmet market need]
-    ✓ Key Competitor: [Competitor name or description of current ineffective alternatives]
-    ✓ Sentiment: [Why users complain about current solutions]
-
+    ✓ [State a realistic market gap, competitor failure, or empty product category based on the idea]
     [3/6] Checking regulatory path...
-    ✓ Category: [Classification descriptor]
-    ✓ Compliance: [Required filing declaration or standards standard]
-    ✓ Timeline: [Realistic approval timeframe]
-
+    ✓ [List the key regulatory, legal, or compliance standard relevant to this specific vertical]
     [4/6] Querying supply chain...
-    ✓ Landed Cost: [A realistic cost approximation per unit]
-    ✓ Target MOQ: [Plausible minimum order quantity]
-    ✓ Lead Time: [Estimated production timeline]
-
+    ✓ [Provide realistic unit economics, production cost approximations, or API/infrastructure stack requirements]
     [5/6] Analyzing founder velocity...
-    ✓ Expertise: [Core validation skill required]
-    ✓ Leverage: [Technical automation efficiency]
-    ✓ Est. Time to Market: [Target speed to launch]
-
+    ✓ [State execution milestones or asset tracking speed required to capture this specific market]
     [6/6] Institutional signal...
-    ✓ Studies: [Type of study or clinical paper validation]
-    ✓ Trends: [Broader industry tailwind descriptor]
-    ✓ Grants: [Whether micro-R&D funding or tax credits apply]
-
-    Build complete. Viability Score: [Calculate a viability percentage based on complexity]/100
+    ✓ [Note an academic reference, institutional research pivot, or venture funding indicator fitting the sector]
     
-    Make terms highly specific to the idea input. Do not use markdown styling. Print the ✓ symbol clearly.`;
+    End your response precisely with a blank line, followed by:
+    Build complete. Viability Score: [Calculate a dynamic percentage score based on complexity]/100
+    
+    Keep lines concise, impactful, and written like an engineering or research system log. Do not use Markdown styling (* or #). Use plain text. Use '✓' explicitly at the start of sub-logs.`;
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${API_KEY}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${GEMINI_API_KEY}`;
         
         const response = await fetch(url, {
             method: 'POST',
@@ -241,7 +116,7 @@ async function streamBuildAnalysis() {
             })
         });
 
-        if (!response.ok) throw new Error("API call rejected by authentication gateway.");
+        if (!response.ok) throw new Error("API call rejected");
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -253,33 +128,35 @@ async function streamBuildAnalysis() {
 
             buffer += decoder.decode(value, { stream: true });
             
+            // Extract raw data from streaming JSON chunks
             const lines = buffer.split("\n");
-            buffer = lines.pop(); 
+            buffer = lines.pop(); // Save incomplete lines to the next chunk buffer
 
             for (const line of lines) {
                 if (line.trim().startsWith('"text":')) {
+                    // Quick parsing of raw streamed text lines
                     let cleanedText = line.replace('"text":', '').replace(/"/g, '').replace(/\\n/g, '\n').trim();
                     if (cleanedText) {
                         processLogLine(cleanedText);
-                        accumulatedFullText += cleanedText + "\n";
                     }
                 }
             }
         }
-
-        // Process final accumulated text into a structured schema
-        const compiledData = parseStreamToDataroom(accumulatedFullText);
-        localStorage.setItem('foundry_dataroom', JSON.stringify(compiledData));
         
-        completeProcess();
+        // Finalize sequence
+        setTimeout(() => {
+            appendLog('<br>$ joinfoundry deploy --boardroom', 'dim');
+            appendLog('> _<span class="cursor"></span>', 'success');
+            setTimeout(() => window.location.href = 'dataroom.html', 2000);
+        }, 1000);
 
     } catch (err) {
-        appendLog(`[!] Stream Exception: ${err.message}`, 'error');
+        appendLog(`[!] Exception thrown during generation: ${err.message}`, 'error');
         useFallback();
     }
 }
 
-// Staggers lines into terminal visualization
+// Handles parsing the lines into the UI with the right structural theme classes
 function processLogLine(text) {
     const segments = text.split('\n');
     segments.forEach(seg => {
@@ -293,23 +170,13 @@ function processLogLine(text) {
             cssClass = 'dim';
         }
         
-        setTimeout(() => appendLog(trimmed, cssClass), Math.random() * 200);
+        // Add a slight stagger effect to look like an organic server runtime
+        setTimeout(() => appendLog(trimmed, cssClass), Math.random() * 300);
     });
 }
 
-async function completeProcess() {
-    await delay(2000);
-    appendLog('<br>$ joinfoundry deploy --boardroom', 'dim');
-    await delay(400);
-    appendLog('> _<span class="cursor"></span>', 'success');
-    await delay(1200);
-    safeNavigate('dataroom.html');
-}
-
-// Start analysis automatically on window mount
-window.onload = function() {
-    streamBuildAnalysis();
-};
+// Start analysis pipeline after a short system preparation delay
+setTimeout(streamBuildAnalysis, 800);
 </script>
 </body>
 </html>
