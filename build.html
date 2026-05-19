@@ -75,6 +75,7 @@
 
 <script>
 // Authentication token bound to your platform testing account
+// Supports both Standard API Keys (AIzaSy...) and OAuth/Access Tokens (AQ.A...)
 const GEMINI_API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow"; 
 
 const logs = document.getElementById('logs');
@@ -236,7 +237,8 @@ async function streamBuildAnalysis() {
 
     try {
         // Adaptively handle Standard API Keys vs OAuth/Service Account Access Tokens
-        const isStandardApiKey = GEMINI_API_KEY.startsWith("AIzaSyAHObN4LWCZKzLLmIrrLDVdh2hxmrvd2mE");
+        // Standard keys start with "AIzaSy", while Service Account access tokens start with OAuth prefixes like "AQ.A" or "ya29"
+        const isStandardApiKey = GEMINI_API_KEY.startsWith("AIzaSy");
         
         const url = isStandardApiKey
             ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${GEMINI_API_KEY}`
@@ -244,7 +246,7 @@ async function streamBuildAnalysis() {
 
         const headers = { 'Content-Type': 'application/json' };
         
-        // If it's an access token/service account credential, pass it via Bearer header
+        // If it's a Service Account Access Token, pass it via Bearer header
         if (!isStandardApiKey) {
             headers['Authorization'] = `Bearer ${GEMINI_API_KEY}`;
         }
