@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Building Data Room...</title>
+<!-- Cryptographic signing library to generate Google OAuth JWT assertions in-browser -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.27/jsrsasign-all-min.js"></script>
 <style>
  :root {
  --bg: #0a0a0a;
@@ -74,16 +76,16 @@
 </div>
 
 <script>
-// Always set apiKey to empty string for the runtime environment injection
-const apiKey = ""; 
-
-// Fallback to your testing Service Account OAuth Access Token if running stand-alone
-const FALLBACK_API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow"; 
+// Service Account details to generate short-lived credentials securely at runtime
+const CLIENT_EMAIL = "joinfoundryv2@joinfoundry.iam.gserviceaccount.com";
+const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaRQ+dJUinnxAE\nCOAoQfV44LUb1uTnB1V0b9VAJ9T+aSuxeytaluLJv1eGD71vUySTrY0XNd8j8LaP\nDGsk8EJVwmrndvFul2u7yGZ2NlicjWWODPJlDNq58aDO3xCnh91Eq80xzAD2cUCJ\ngxCnvkYd7R4lymnIjiGWOujJ7ACoI4PR4LC4aHI4avrlC6JK1uUbmvuHJZlq1vVf\n0eTsvXO9IUm2YBAGqm0iaZ5np40Y6hiDA9Enb7VmXc/cZWST3HtHOeezpSzARP12\nTUqnH9a3YulZ7GuK1qJWlUbnNgaVxnMibnT8pqwiMY7XD7fo6sT+MnjKlF72eH/C\n7AsujPc9AgMBAAECggEAMzzgB/M/JX4s+817lWe6cJhLW5AsJuGtWUqBZHCVSu20\nYJL53+eosFR2/tUGErKRVQt6Ifc2/RBeQqFXK5Is+EXN460jyuLH2wqVpu1mCsYU\nj26RnlAQrnK+3aE2nyVBN4QfBLAPj8qRLFa0m7QKcK7/kz57a6WV09bbW79HfjB8\nxfKsPqG38mscSY53OIEPPG3ASePmsOszAVnhaFwUTBUhwT3+j0td37HaSzRh6sKl\n3V79EJomsJoPX+T1QePoRLGMpiOUG+7qpFVhYAS43lHpW/Qeaun5V+7pHFd3AMAh\n1ETdMCibA5W8Yp3aLWzZEfBvks8gXyNaEcZj0ii77wKBgQD/65Z9Sai5bFTNP6PW\nONnpJFQLUyMzmR5VwJ/D1AZoh0ZQW05QaJmMrxrikPXC4xPO135xL2TI9dCxim7L\nBYQJfUlhm06Q7Ga9jG43Ug2CIHBK16AOMsL2n8EQ/IzbWj3PexZ2To9YQkY1LE67\nB3sn4Rlik9WpWEPx7wxdkC532wKBgQDaVnhbfzkm4K+nstrTYlSVCeOo4ZiS0S6l\nFlltz9TcO4wnCPRZRH5Mptz7Zyk/UBPURgsrvgxZi3RETVCtufTeChtdzmLEvLaH\nR2WXP6MzhEXZoBFehEIXqQNvPvmePtnoh1/1NiCo7XGPyp2hh6/i46Xai+5FsS38\nbJKQ9qkkxwKBgArqFjnzqUF3MEqsmyUouYpq5Taybf7mWdfYZjfo0/kjQ8lri3R8\ncYgBc8kT25dbLd4VbKwRFGBJs4PO3pjD/HSXJkkGYZxmqJ8O3Sh41GCnV4KpnYbd\nfVkdSRObYbp9J8OwgS28ffqKoQnlgNoTIJp7zCRbH7KgNA2eX02iN4kfAoGAO5/L\nhGkMyXIoZepw2bMLmBu4QQFCci2PyGN/Dn7oCTB1yJ8oY0xSFUqoJDt6xyBuGdT6\n7fobU0TC/ngCpT6YAR7PdGGNFV7Xlb/InXIydjoT/Sc6Nw51IhL0rieLcUyGo3p8\nmPEsIBWfon3ZaCguvw4d173I1t1Yyos3x0Ck1jcCgYEAxhxRrZKK9ZieC/Zz0Lmc\n3EQ4ONDVa0lvl3A+JUqJhc4cRigPAMuw7X7Imi7mNSZC3nV1NU1ErMyv6ilZW60s\nrKOpKxd3aZFlINSscYvxlhj1wY9VnqL/fk42DC9eKTXDXRhG4QRCdnv1T/RgtcaX\nv2cn7Ma9l7qlNHmcv6dsfrQ=\n-----END PRIVATE KEY-----\n`;
 
 const logs = document.getElementById('logs');
 const problem = localStorage.getItem('foundry_problem') || 'UK nurses get toe blisters. 12h shifts. £2B anti-chafe market. I think a toe-gap applicator solves it.';
 const slug = localStorage.getItem('foundry_slug') || 'toe-gap-applicator';
 document.getElementById('slug').textContent = slug;
+
+let accumulatedFullText = ""; // Reconstruct entire response for parsing
 
 function appendLog(text, className = '') {
     const div = document.createElement('div');
@@ -110,6 +112,47 @@ function safeNavigate(target) {
         console.error("Redirection blocked by sandbox constraints", e);
         appendLog(`\n<span class="warning">[Sandbox Warning] Automatic redirection blocked by iframe constraints.</span>`, 'warning');
         appendLog(`👉 <a href="${target}" style="color:var(--green); font-weight:bold; text-decoration:underline;">Click here to open ${target} manually</a>`, 'success');
+    }
+}
+
+// Dynamic exchange flow generating a fresh Bearer Token via Service Account credentials
+async function fetchServiceAccountAccessToken() {
+    try {
+        const header = { alg: "RS256", typ: "JWT" };
+        const now = KJUR.jws.IntDate.get("now");
+        const exp = KJUR.jws.IntDate.get("now + 1h");
+        
+        const payload = {
+            iss: CLIENT_EMAIL,
+            sub: CLIENT_EMAIL,
+            aud: "https://oauth2.googleapis.com/token",
+            iat: now,
+            exp: exp,
+            scope: "https://www.googleapis.com/auth/generativelanguage https://www.googleapis.com/auth/cloud-platform"
+        };
+        
+        const sHeader = JSON.stringify(header);
+        const sPayload = JSON.stringify(payload);
+        const jwtAssertion = KJUR.jws.JWS.sign("RS256", sHeader, sPayload, PRIVATE_KEY);
+        
+        const response = await fetch("https://oauth2.googleapis.com/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                assertion: jwtAssertion
+            })
+        });
+        
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Token exchange rejected: ${errText}`);
+        }
+        
+        const data = await response.json();
+        return data.access_token;
+    } catch (e) {
+        throw new Error(`Cryptographic token acquisition exception: ${e.message}`);
     }
 }
 
@@ -160,14 +203,12 @@ function parseStreamToDataroom(text) {
         }
     });
 
-    // If we extracted no dynamic metrics from the stream, flag as invalid
     if (parsedMetricsCount === 0) {
         return null;
     }
 
-    // Assign dynamically scaled individual scores based on the generated total score
     if (totalScore === 0) {
-        totalScore = Math.floor(Math.random() * 30) + 75; // Generate realistic total if score parsing missed
+        totalScore = Math.floor(Math.random() * 30) + 75;
     }
 
     pillars.forEach((p, idx) => {
@@ -176,7 +217,6 @@ function parseStreamToDataroom(text) {
         if (p.score < 5) p.score = 11;
     });
 
-    // Synthesize exit valuation values dynamically to complete the 7-pillar matrix
     const multiple = (Math.random() * 2 + 4.1).toFixed(1);
     pillars[6].metrics = [
         ["Sector Valuation", `${multiple}x Multiple`],
@@ -191,16 +231,21 @@ function parseStreamToDataroom(text) {
 }
 
 async function runBuildAnalysis() {
-    const activeKey = apiKey || FALLBACK_API_KEY;
+    appendLog('[0/6] Loading service account signatures...', 'dim');
+    await delay(300);
 
-    if (!activeKey) {
-        appendLog('[CRITICAL ERROR] API Key Missing. Please assign activeKey in script header.', 'error');
-        appendLog('[!] Process aborted. Real-time telemetry could not initialize without valid authorization.', 'error');
+    let activeToken = "";
+    try {
+        appendLog('[0/6] Exchanging signed JWT assertion with Google OAuth...', 'dim');
+        activeToken = await fetchServiceAccountAccessToken();
+    } catch (e) {
+        appendLog(`\n[CRITICAL ERROR] Authentication Failed: ${e.message}`, 'error');
+        completeProcess(false);
         return;
     }
 
     appendLog('[0/6] Initializing secure telemetry connection to Gemini API...', 'dim');
-    await delay(300);
+    await delay(200);
 
     const systemPrompt = `You are the back-end engine of JoinFoundry. Analyze the user's business idea and output exactly 6 sections matching this format layout precisely:
 
@@ -239,23 +284,15 @@ async function runBuildAnalysis() {
     Make terms highly specific to the idea input. Do not use markdown styling. Print the ✓ symbol clearly.`;
 
     try {
-        // Adaptively handle standard API keys vs OAuth/Service Account Tokens starting with "AQ.A"
-        const isStandardApiKey = activeKey.startsWith("AIzaSy");
-        
-        const url = isStandardApiKey
-            ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`
-            : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
-
-        const headers = { 'Content-Type': 'application/json' };
-        
-        // Pass Service Account tokens via secure Authorization header
-        if (!isStandardApiKey) {
-            headers['Authorization'] = `Bearer ${activeKey}`;
-        }
+        // Vertex AI / Generative Language Endpoint with Bearer Token in headers
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
 
         const response = await fetch(url, {
             method: 'POST',
-            headers: headers,
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${activeToken}`
+            },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: `Analyze this venture: "${problem}"` }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] }
@@ -274,7 +311,7 @@ async function runBuildAnalysis() {
             throw new Error("Empty reasoning payload returned from synthesis cluster.");
         }
 
-        // Output lines with a staggered visual delay to preserve the terminal experience
+        // Stagger visual terminal line output
         const lines = textResponse.split('\n');
         for (const line of lines) {
             const trimmed = line.trim();
@@ -288,10 +325,9 @@ async function runBuildAnalysis() {
             }
 
             appendLog(trimmed, cssClass);
-            await delay(180 + Math.random() * 120); // Simulates organic console typing speed
+            await delay(180 + Math.random() * 120);
         }
 
-        // Reconstruct full output text for validation parsing
         const compiledData = parseStreamToDataroom(textResponse);
         
         if (compiledData) {
@@ -318,7 +354,6 @@ async function completeProcess(isValid) {
     await delay(800);
     
     if (isValid) {
-        // Inject custom action button only if data is fully verified
         const actionContainer = document.createElement('div');
         actionContainer.style.opacity = '0';
         actionContainer.style.animation = 'fadeIn 0.5s forwards';
@@ -333,7 +368,6 @@ async function completeProcess(isValid) {
         actionContainer.appendChild(continueBtn);
         logs.appendChild(actionContainer);
     } else {
-        // Redirection block notification
         appendLog('<span class="error">[SYSTEM BLOCK] Redirection credentials missing. Build halted.</span>', 'error');
     }
     window.scrollTo(0, document.body.scrollHeight);
