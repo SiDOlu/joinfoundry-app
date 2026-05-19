@@ -153,8 +153,8 @@ async function runBuildAnalysis() {
     const systemPrompt = `Analyze the venture: "${problem}". Output 6 sections: Market Demand, White Space, Regulatory Path, Supply Chain, Founder Velocity, Institutional Signal. Use [1/6] etc tags. End with "Build complete. Viability Score: [score]/100". Do not use markdown.`;
 
     try {
-        // Corrected Model path to the standard stable release
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent?key=${API_KEY}`;
+        // Updated model to gemini-2.5-flash as confirmed by your Model Discovery Diagnostic
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`;
 
         const response = await fetch(url, {
             method: 'POST',
