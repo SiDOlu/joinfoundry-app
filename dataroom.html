@@ -65,11 +65,11 @@ letter-spacing: 1px;
 opacity: 0.8;
 margin-bottom: 8px;
 }
-.score-banner.score {
+.score-banner .score {
 font-size: 48px;
 font-weight: 700;
 }
-.score-banner.label {
+.score-banner .label {
 font-size: 14px;
 opacity: 0.9;
 }
@@ -178,7 +178,6 @@ Loading problem statement...
 </div>
 
 <div class="grid" id="pillarsGrid">
-<!-- Pillars injected by JS -->
 </div>
 
 <div class="actions">
@@ -196,28 +195,16 @@ window.location.href = '/';
 
 document.getElementById('problemText').textContent = PROBLEM_TEXT;
 
-// Mock data generator - replace with real API calls later
+// Mock data generator - runs if Gemini pipeline hasn't cached an array
 function generatePillars(text) {
-// Pillar 1: Market Demand
 const demandVol = Math.floor(Math.random() * 50000) + 5000;
 const demandScore = demandVol > 20000? 18 : demandVol > 5000? 12 : 6;
-
-// Pillar 2: White Space
 const whiteSpaceScore = Math.floor(Math.random() * 5) + 15;
-
-// Pillar 3: Regulatory
 const regScore = text.toLowerCase().includes('medical')? 8 : 18;
-
-// Pillar 4: Supply Chain
 const supplyScore = Math.floor(Math.random() * 6) + 12;
-
-// Pillar 5: Founder Velocity
 const founderScore = Math.floor(Math.random() * 8) + 10;
-
-// Pillar 6: Institutional Signal
 const instScore = Math.floor(Math.random() * 7) + 11;
 
-// Pillar 7: Valuation
 const multiple = (Math.random() * 3 + 3).toFixed(1);
 const theoreticalExit = Math.floor(demandVol * 0.1 * multiple / 1000) * 1000;
 const valScore = multiple > 5? 18 : multiple > 3? 14 : 8;
@@ -331,10 +318,10 @@ return `
 <div class="pillar-card">
 <div class="pillar-header">
 <div class="pillar-title">
-<span>${p.icon}</span>
+<span>${p.icon || '📁'}</span>
 <span>${p.title}</span>
 </div>
-<div class="pillar-score ${scoreClass}">${p.score}/${p.max}</div>
+<div class="pillar-score ${scoreClass}">${p.score}/${p.max || 20}</div>
 </div>
 <div class="pillar-body">
 ${p.metrics.map(m => `
@@ -355,10 +342,22 @@ localStorage.setItem('foundry_score', document.getElementById('totalScore').text
 window.location.href = '/boardroom.html';
 }
 
-// Run
-const data = generatePillars(PROBLEM_TEXT);
-renderPillars(data);
-localStorage.setItem('foundry_dataroom', JSON.stringify(data));
+// Runtime Check: Prioritize raw JSON data from Gemini script execution block if available
+const cachedDataroom = localStorage.getItem('foundry_dataroom');
+let activeData;
+
+if (cachedDataroom) {
+    try {
+        activeData = JSON.parse(cachedDataroom);
+    } catch(e) {
+        activeData = generatePillars(PROBLEM_TEXT);
+    }
+} else {
+    activeData = generatePillars(PROBLEM_TEXT);
+    localStorage.setItem('foundry_dataroom', JSON.stringify(activeData));
+}
+
+renderPillars(activeData);
 </script>
 </body>
 </html>
