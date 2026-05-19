@@ -119,8 +119,10 @@ function safeNavigate(target) {
 async function fetchServiceAccountAccessToken() {
     try {
         const header = { alg: "RS256", typ: "JWT" };
-        const now = KJUR.jws.IntDate.get("now");
-        const exp = KJUR.jws.IntDate.get("now + 1h");
+        
+        // Use standard JS integer timestamps to avoid library-specific timezone parsing issues
+        const now = Math.floor(Date.now() / 1000);
+        const exp = now + 3600; // Token valid for exactly 1 hour
         
         const payload = {
             iss: CLIENT_EMAIL,
@@ -133,7 +135,11 @@ async function fetchServiceAccountAccessToken() {
         
         const sHeader = JSON.stringify(header);
         const sPayload = JSON.stringify(payload);
-        const jwtAssertion = KJUR.jws.JWS.sign("RS256", sHeader, sPayload, PRIVATE_KEY);
+        
+        // Format the private key cleanly, replacing string-escaped "\n" sequences with physical newlines
+        const cleanKey = PRIVATE_KEY.replace(/\\n/g, '\n').trim();
+        
+        const jwtAssertion = KJUR.jws.JWS.sign("RS256", sHeader, sPayload, cleanKey);
         
         const response = await fetch("https://oauth2.googleapis.com/token", {
             method: "POST",
@@ -152,7 +158,9 @@ async function fetchServiceAccountAccessToken() {
         const data = await response.json();
         return data.access_token;
     } catch (e) {
-        throw new Error(`Cryptographic token acquisition exception: ${e.message}`);
+        // Handle both standard Error objects and raw string exceptions thrown by jsrsasign
+        const errorMsg = e instanceof Error ? e.message : String(e);
+        throw new Error(`Cryptographic token acquisition exception: ${errorMsg}`);
     }
 }
 
@@ -239,6 +247,7 @@ async function runBuildAnalysis() {
         appendLog('[0/6] Exchanging signed JWT assertion with Google OAuth...', 'dim');
         activeToken = await fetchServiceAccountAccessToken();
     } catch (e) {
+        // The detailed cryptographic error string is safely displayed here now
         appendLog(`\n[CRITICAL ERROR] Authentication Failed: ${e.message}`, 'error');
         completeProcess(false);
         return;
