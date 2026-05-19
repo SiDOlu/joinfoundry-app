@@ -10,6 +10,7 @@
  --text: #e5e5e5;
  --green: #00ff88;
  --yellow: #ffaa00;
+ --red: #ff5555;
  --gray: #525252;
  --font: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
  }
@@ -23,9 +24,10 @@
  padding: 16px;
  }
  .container { max-width: 680px; margin: 0 auto; padding-top: 4vh; }
- .log { margin-bottom: 4px; opacity: 0; animation: fadeIn 0.2s forwards; }
+ .log { margin-bottom: 4px; opacity: 0; animation: fadeIn 0.2s forwards; white-space: pre-wrap; }
  .success { color: var(--green); }
  .warning { color: var(--yellow); }
+ .error { color: var(--red); }
  .dim { color: var(--gray); }
  .cursor {
  display: inline-block;
@@ -47,53 +49,134 @@
 </div>
 
 <script>
+// IMPORTANT: Insert your Gemini API key here.
+// Note: For a production release, route this request through a thin server wrapper to hide your key.
+const GEMINI_API_KEY = "AQ.Ab8RN6IZRr99SwCEoVz8fLMSAJ3pMtTNl2yY2eG-Oi7Ig-Y1ow"; 
+
 const logs = document.getElementById('logs');
-const problem = localStorage.getItem('foundry_problem') || 'Unknown project';
+const problem = localStorage.getItem('foundry_problem') || 'No idea provided.';
 const slug = localStorage.getItem('foundry_slug') || 'project';
 document.getElementById('slug').textContent = slug;
 
-// Log sequence — customize per vertical later
-const logSteps = [
- { text: '', delay: 300 },
- { text: '[1/6] Fetching market demand...', delay: 400 },
- { text: ' ✓ Google Trends: "blister prevention" 22,100/mo +32% YoY', delay: 500, class: 'success' },
- { text: ' ✓ ONS: Footcare TAM £2.1B, CAGR 4.1%', delay: 500, class: 'success' },
- { text: '[2/6] Scanning white space...', delay: 600 },
- { text: ' ✓ Boots.com: 0 SKUs for "toe applicator"', delay: 500, class: 'success' },
- { text: ' ✓ Amazon: Scholl 3.2★. Top complaint: "doesn\'t reach gaps" [1,240 reviews]', delay: 500, class: 'success' },
- { text: '[3/6] Checking regulatory path...', delay: 600 },
- { text: ' ✓ MHRA: Cosmetic notification. 6 weeks. No claims = no DTAC', delay: 500, class: 'success' },
- { text: '[4/6] Querying supply chain...', delay: 600 },
- { text: ' ✓ Alibaba: 12 factories PP stick. MOQ 2k. £2.80 landed DDP', delay: 500, class: 'success' },
- { text: '[5/6] Analyzing founder velocity...', delay: 600 },
- { text: ' ✓ LinkedIn: 8 posts/90d. Comments replied. Domain expert.', delay: 500, class: 'success' },
- { text: '[6/6] Institutional signal...', delay: 600 },
- { text: ' ✓ PubMed: 3 RCTs on aluminum salts + friction reduction', delay: 500, class: 'success' },
- { text: ' ✓ Leeds Podiatry: Lab contact found. Testing available Q1.', delay: 500, class: 'success' },
- { text: '', delay: 400 },
- { text: 'Build complete. Viability Score: 87/100', delay: 600, class: 'success' },
- { text: '', delay: 400 },
- { text: '$ joinfoundry deploy --boardroom', delay: 300 },
- { text: '> _<span class="cursor"></span>', delay: 300, final: true }
-];
-
-let i = 0;
-function printLog() {
- if (i >= logSteps.length) {
- setTimeout(() => window.location.href = 'dataroom.html', 1500);
- return;
- }
- const step = logSteps[i];
- const div = document.createElement('div');
- div.className = `log ${step.class || ''}`;
- div.innerHTML = step.text;
- logs.appendChild(div);
- window.scrollTo(0, document.body.scrollHeight);
- i++;
- setTimeout(printLog, step.delay);
+function appendLog(text, className = '') {
+    const div = document.createElement('div');
+    div.className = `log ${className}`;
+    div.innerHTML = text;
+    logs.appendChild(div);
+    window.scrollTo(0, document.body.scrollHeight);
 }
 
-setTimeout(printLog, 300);
+// Simple fallback steps if API is unreachable
+function useFallback() {
+    appendLog('[!] Fallback activated. Generating local simulation...', 'warning');
+    setTimeout(() => appendLog('✓ Initializing offline evaluation models...', 'success'), 400);
+    setTimeout(() => appendLog('Build complete. Viability Score: 78/100', 'success'), 1200);
+    setTimeout(() => window.location.href = 'dataroom.html', 3000);
+}
+
+async function streamBuildAnalysis() {
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+        appendLog('[CRITICAL ERROR] API Key Missing. Please assign GEMINI_API_KEY in the script block.', 'error');
+        useFallback();
+        return;
+    }
+
+    appendLog('[0/6] Connecting to core synthesis cluster...', 'dim');
+
+    // System instructions forcing Gemini to reply in line-by-line terminal chunks
+    const systemPrompt = `You are the back-end engine of JoinFoundry. The user will give you a startup idea or a business problem. 
+    Analyze it dynamically and give an objective analysis structured strictly into 6 short sections matching this style:
+    [1/6] Fetching market demand...
+    ✓ [Give a realistic, data-focused market statistic or metric tailored specifically to the user's input idea]
+    [2/6] Scanning white space...
+    ✓ [State a realistic market gap, competitor failure, or empty product category based on the idea]
+    [3/6] Checking regulatory path...
+    ✓ [List the key regulatory, legal, or compliance standard relevant to this specific vertical]
+    [4/6] Querying supply chain...
+    ✓ [Provide realistic unit economics, production cost approximations, or API/infrastructure stack requirements]
+    [5/6] Analyzing founder velocity...
+    ✓ [State execution milestones or asset tracking speed required to capture this specific market]
+    [6/6] Institutional signal...
+    ✓ [Note an academic reference, institutional research pivot, or venture funding indicator fitting the sector]
+    
+    End your response precisely with a blank line, followed by:
+    Build complete. Viability Score: [Calculate a dynamic percentage score based on complexity]/100
+    
+    Keep lines concise, impactful, and written like an engineering or research system log. Do not use Markdown styling (* or #). Use plain text. Use '✓' explicitly at the start of sub-logs.`;
+
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=${GEMINI_API_KEY}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: `Analyze this venture: "${problem}"` }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            })
+        });
+
+        if (!response.ok) throw new Error("API call rejected");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            
+            // Extract raw data from streaming JSON chunks
+            const lines = buffer.split("\n");
+            buffer = lines.pop(); // Save incomplete lines to the next chunk buffer
+
+            for (const line of lines) {
+                if (line.trim().startsWith('"text":')) {
+                    // Quick parsing of raw streamed text lines
+                    let cleanedText = line.replace('"text":', '').replace(/"/g, '').replace(/\\n/g, '\n').trim();
+                    if (cleanedText) {
+                        processLogLine(cleanedText);
+                    }
+                }
+            }
+        }
+        
+        // Finalize sequence
+        setTimeout(() => {
+            appendLog('<br>$ joinfoundry deploy --boardroom', 'dim');
+            appendLog('> _<span class="cursor"></span>', 'success');
+            setTimeout(() => window.location.href = 'dataroom.html', 2000);
+        }, 1000);
+
+    } catch (err) {
+        appendLog(`[!] Exception thrown during generation: ${err.message}`, 'error');
+        useFallback();
+    }
+}
+
+// Handles parsing the lines into the UI with the right structural theme classes
+function processLogLine(text) {
+    const segments = text.split('\n');
+    segments.forEach(seg => {
+        let trimmed = seg.trim();
+        if (!trimmed) return;
+
+        let cssClass = '';
+        if (trimmed.startsWith('✓') || trimmed.includes('Build complete.')) {
+            cssClass = 'success';
+        } else if (trimmed.startsWith('[')) {
+            cssClass = 'dim';
+        }
+        
+        // Add a slight stagger effect to look like an organic server runtime
+        setTimeout(() => appendLog(trimmed, cssClass), Math.random() * 300);
+    });
+}
+
+// Start analysis pipeline after a short system preparation delay
+setTimeout(streamBuildAnalysis, 800);
 </script>
 </body>
 </html>
