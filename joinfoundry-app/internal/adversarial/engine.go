@@ -12,6 +12,16 @@ type AdversarialEngine interface {
 	AnalyzeIdea(ctx context.Context, idea *model.Idea) (*model.ValidationReport, error)
 }
 
+feature/backend-foundation
+type mockAdversarialEngine struct{}
+
+func NewAdversarialEngine() AdversarialEngine {
+	return &mockAdversarialEngine{}
+}
+
+func (e *mockAdversarialEngine) AnalyzeIdea(ctx context.Context, idea *model.Idea) (*model.ValidationReport, error) {
+	return &model.ValidationReport{
+=======
 type llmAdversarialEngine struct {
 }
 
@@ -21,11 +31,13 @@ func NewAdversarialEngine() AdversarialEngine {
 
 func (e *llmAdversarialEngine) AnalyzeIdea(ctx context.Context, idea *model.Idea) (*model.ValidationReport, error) {
 	// Simulated response based on the schema
-	report := &model.ValidationReport{
+	report := &model.ValidationReport{main
 		ID:            uuid.New(),
 		IdeaID:        idea.ID,
 		OverallStatus: model.ValidationResultPass,
 		CreatedAt:     time.Now(),
+feature/backend-foundation
+	}, nil
 		UpdatedAt:     time.Now(),
 		Stages: []model.StageResult{
 			{
@@ -38,5 +50,6 @@ func (e *llmAdversarialEngine) AnalyzeIdea(ctx context.Context, idea *model.Idea
 		},
 	}
 
-	return report, nil
+	return report, nil 
+    main
 }
