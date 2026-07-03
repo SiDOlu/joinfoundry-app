@@ -1,8 +1,72 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const Window = ({ title, content, onClose }) => {
+  const windowRef = useRef(null);
+
+  useEffect(() => {
+    // Save current focus to restore it later
+    const previousActiveElement = document.activeElement;
+
+    // Focus the window or first focusable element
+    if (windowRef.current) {
+        const focusableElements = windowRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length > 0) {
+            focusableElements[0].focus();
+        } else {
+            windowRef.current.focus();
+        }
+    }
+
+    // Keydown handler
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            onClose();
+        }
+
+        if (e.key === 'Tab') {
+            const focusableElements = windowRef.current.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            
+            if (focusableElements.length === 0) {
+                e.preventDefault();
+                return;
+            }
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey) { // Shift + Tab
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                }
+            } else { // Tab
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
+        }
+    };
+
+    windowRef.current.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup: restore focus
+    return () => {
+        windowRef.current.removeEventListener('keydown', handleKeyDown);
+        if (previousActiveElement) {
+          previousActiveElement.focus();
+        }
+    };
+  }, [onClose]);
+
   return (
     <section 
+      ref={windowRef}
+      tabIndex="-1"
       style={{ 
         position: 'absolute', 
         top: '50px', 
