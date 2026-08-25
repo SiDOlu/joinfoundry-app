@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>joinfoundry.run — Decentralized R&D Engine</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        foundry: {
+                            base: '#0f172a',
+                            surface: '#1e293b',
+                            card: '#162032',
+                            border: '#334155',
+                            cyan: '#38bdf8',
+                            blue: '#3b82f6',
+                            green: '#10b981',
+                            amber: '#f59e0b',
+                            red: '#ef4444',
+                            text: '#e2e8f0',
+                            muted: '#94a3b8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 25px -5px rgba(56, 189, 248, 0.25); }
+            50% { box-shadow: 0 0 35px 2px rgba(56, 189, 248, 0.45); }
+        }
+        .glow-box { animation: pulseGlow 4s infinite ease-in-out; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-foundry-base text-foundry-text font-sans antialiased min-h-screen flex flex-col selection:bg-foundry-cyan selection:text-foundry-base">
+
+    <!-- Navigation Header -->
+    <header class="border-b border-foundry-border glass-panel sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="resetToHome()">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-foundry-blue to-foundry-cyan flex items-center justify-center font-mono font-bold text-slate-900 text-lg shadow-lg">
+                    <i class="fa-solid fa-cube text-slate-950"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
+                        joinfoundry<span class="text-foundry-cyan font-mono text-sm">.run</span>
+                    </span>
+                    <span class="text-[10px] text-foundry-muted uppercase tracking-wider font-mono">Decentralized R&D Engine</span>
+                </div>
+            </div>
+
+            <!-- Header Stats & Links -->
+            <div class="hidden md:flex items-center space-x-6 text-sm">
+                <div class="flex items-center space-x-2 text-xs font-mono bg-slate-900/80 px-3 py-1.5 rounded-full border border-foundry-border">
+                    <span class="w-2 h-2 rounded-full bg-foundry-green animate-pulse"></span>
+                    <span class="text-foundry-muted">R&D Directives Live:</span>
+                    <span class="text-foundry-cyan font-bold">142 Active Capacity Grants</span>
+                </div>
+                <a href="#how-it-works" class="text-foundry-muted hover:text-white transition-colors">How It Works</a>
+                <a href="#scoring" class="text-foundry-muted hover:text-white transition-colors">7-Pillar Matrix</a>
+                <button onclick="scrollToInput()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-foundry-surface border border-foundry-border hover:border-foundry-cyan text-white transition-all">
+                    Test an Idea
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow">
+        
+        <!-- Hero Section -->
+        <section id="hero-section" class="relative pt-12 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
+            
+            <!-- Category Badge -->
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-foundry-cyan/10 border border-foundry-cyan/30 text-foundry-cyan text-xs font-mono font-semibold mb-6">
+                <i class="fa-solid fa-bolt text-[10px]"></i>
+                <span>Zero-Friction Innovation Validation</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
+                Turn a <span class="bg-gradient-to-r from-foundry-cyan via-sky-300 to-foundry-blue bg-clip-text text-transparent">1-Line Idea</span> into an Enterprise-Backed R&D Project
+            </h1>
+
+            <!-- Subhead -->
+            <p class="text-base sm:text-lg text-foundry-muted max-w-2xl mx-auto mb-10 leading-relaxed">
+                No network or warm introductions required. Enter your problem statement to trigger an instant 60-second multi-source audit across market demand, patents, regulatory databases, and manufacturing suppliers.
+            </p>
+
+            <!-- THE HERO INPUT COMMAND CENTER -->
+            <div id="terminal-container" class="glow-box bg-foundry-surface rounded-2xl border border-foundry-border p-4 sm:p-6 text-left max-w-3xl mx-auto shadow-2xl relative">
+                
+                <div class="flex items-center justify-between pb-3 border-b border-foundry-border mb-4 text-xs font-mono text-foundry-muted">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                        <span class="ml-2 text-slate-400 font-semibold">foundry_intake_terminal_v3.0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[11px] text-foundry-cyan">
+                        <i class="fa-solid fa-lock text-[10px]"></i>
+                        <span>Anonymous Audit • No Card Required</span>
+                    </div>
+                </div>
+
+                <!-- Main Input Field -->
+                <div class="relative">
+                    <textarea id="problem-input" rows="3" 
+                        class="w-full bg-foundry-base text-white placeholder-slate-500 text-sm sm:text-base rounded-xl p-4 border border-foundry-border focus:border-foundry-cyan focus:ring-1 focus:ring-foundry-cyan focus:outline-none font-mono resize-none transition-all"
+                        placeholder="Describe your technical or non-technical problem... (e.g., Biocompatible hydrogel dressing for diabetic toe ulcers with instant moisture sensing)"></textarea>
+                    
+                    <div class="mt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="text-xs text-foundry-muted flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-info text-foundry-cyan"></i>
+                            <span>Scrapes 7 live sources in <strong class="text-white">&lt;60s</strong></span>
+                        </div>
+                        <button id="submit-btn" onclick="runAnalysis()" 
+                            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-foundry-blue to-foundry-cyan hover:from-blue-600 hover:to-sky-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/20 transition-all cursor-pointer">
+                            <span>Run 60s Foundry Audit</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Example Chips -->
+                <div class="mt-5 pt-4 border-t border-slate-800/80">
+                    <span class="text-[11px] font-mono text-foundry-muted uppercase tracking-wider block mb-2">Or test a sample prompt:</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setPrompt('Biocompatible hydrogel dressing for diabetic toe gaps with real-time pH sensor')" 
+                            class="text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 hover:border-foundry-cyan transition-all text-left">
+                            🩸 Healthcare: Diabetic Foot Dressing
+                        </button>
+                        <button onclick="setPrompt('Autonomous modular battery swapping station for heavy fleet electric delivery trucks')" 
+                            class="text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 hover:border-foundry-cyan transition-all text-left">
+                            🚛 Transport: Heavy EV Battery Swap
+                        </button>
+                        <button onclick="setPrompt('Biodegradable seaweed-based rigid packaging for frozen food logistics')" 
+                            class="text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 hover:border-foundry-cyan transition-all text-left">
+                            🌿 Materials: Bio Packaging
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Modal / Scanning Overlay -->
+            <div id="scanning-overlay" class="hidden glow-box bg-foundry-surface rounded-2xl border border-foundry-border p-8 text-left max-w-3xl mx-auto shadow-2xl">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-8 rounded-full bg-foundry-cyan/20 text-foundry-cyan flex items-center justify-center animate-spin">
+                        <i class="fa-solid fa-circle-notch"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-lg">Executing 7-Pillar Pipeline</h3>
+                        <p class="text-xs text-foundry-muted font-mono" id="current-step-label">Initializing parallel workers...</p>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-900 rounded-full h-2 mb-6 overflow-hidden border border-slate-800">
+                    <div id="progress-bar" class="bg-gradient-to-r from-foundry-blue to-foundry-cyan h-full w-0 transition-all duration-300"></div>
+                </div>
+
+                <!-- Worker Console Output -->
+                <div class="bg-slate-950 rounded-xl p-4 border border-slate-800 font-mono text-xs space-y-2 h-40 overflow-y-auto" id="console-logs">
+                    <!-- Dynamic logs inserted via JS -->
+                </div>
+            </div>
+
+            <!-- Tier 1 Results View (Hidden Initially) -->
+            <div id="results-container" class="hidden text-left max-w-4xl mx-auto space-y-6">
+                <!-- Success Header -->
+                <div class="bg-slate-900/90 border border-foundry-border rounded-2xl p-6 relative overflow-hidden">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-foundry-green/10 border border-foundry-green/30 text-foundry-green text-xs font-mono font-bold mb-2">
+                                <i class="fa-solid fa-check"></i> Tier 1 Public Summary Generated
+                            </div>
+                            <h2 class="text-2xl font-bold text-white mb-1" id="project-title-display">Project Title</h2>
+                            <p class="text-xs text-foundry-muted font-mono" id="session-id-display">Session Hash: 8f92a0e1c...</p>
+                        </div>
+
+                        <!-- Big Score Badge -->
+                        <div class="bg-foundry-surface border border-foundry-border rounded-xl p-4 text-center min-w-[160px] flex flex-col items-center">
+                            <span class="text-xs font-mono text-foundry-muted uppercase tracking-wider">Foundry Score</span>
+                            <span class="text-4xl font-extrabold text-foundry-cyan font-mono my-1" id="score-display">840</span>
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-foundry-green/20 text-foundry-green border border-foundry-green/40">
+                                BOARDROOM READY
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blurred Preview & Auth Gate Banner -->
+                <div class="relative bg-foundry-surface border border-foundry-border rounded-2xl p-6 overflow-hidden">
+                    
+                    <!-- 7-Pillar Summary Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-300">1. Market Demand</span>
+                                <span class="text-xs font-mono text-foundry-cyan font-bold">180/200</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Search Vol: <strong class="text-white">42.5k/mo</strong> • CPC: <strong class="text-white">$4.80</strong></p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-300">2. White Space & Novelty</span>
+                                <span class="text-xs font-mono text-foundry-cyan font-bold">135/150</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Patent Vector Distance: <strong class="text-white">0.78 (High Novelty)</strong></p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-300">3. Regulatory Classification</span>
+                                <span class="text-xs font-mono text-foundry-amber font-bold">110/150</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Classification: <strong class="text-white">Class II Medical Device</strong></p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 opacity-60">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-300">4. Supply Chain Density</span>
+                                <span class="text-xs font-mono text-foundry-cyan font-bold">125/150</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Matched Suppliers: <span class="blur-sm select-none">14 Verified ISO Cleanrooms</span></p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 opacity-60">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-300">5. Corporate Matchmaking</span>
+                                <span class="text-xs font-mono text-foundry-green font-bold">Matched</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Matches Found: <span class="blur-sm select-none">3 Health Device OEMs</span></p>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 opacity-60">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-300">6. Exit Comps & Valuation</span>
+                                <span class="text-xs font-mono text-foundry-cyan font-bold">120/150</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Median Comp Multiple: <span class="blur-sm select-none">8.4x ARR ($12M baseline)</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Lock Overlay Call To Action -->
+                    <div class="bg-gradient-to-t from-slate-950 via-slate-900/95 to-slate-900/80 p-8 text-center rounded-xl border border-foundry-cyan/40 relative z-10 shadow-2xl">
+                        <div class="w-12 h-12 rounded-full bg-foundry-blue/20 text-foundry-cyan flex items-center justify-center mx-auto mb-3 border border-foundry-cyan/40">
+                            <i class="fa-solid fa-shield-halved text-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Claim Your Project & Unlock Enterprise Boardroom</h3>
+                        <p class="text-xs text-foundry-muted max-w-lg mx-auto mb-6">
+                            Your score of <strong class="text-foundry-cyan font-mono" id="cta-score">840</strong> qualifies for direct matching with <strong class="text-white">3 Corporate R&D Directives</strong>. Sign up in 1-click to persist your project and initiate Smart NDA access.
+                        </p>
+                        
+                        <div class="flex flex-wrap items-center justify-center gap-3 max-w-md mx-auto">
+                            <button onclick="triggerAuth('Google')" class="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs border border-slate-700 flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-brands fa-google text-red-400"></i>
+                                <span>Sign up with Google</span>
+                            </button>
+                            <button onclick="triggerAuth('LinkedIn')" class="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs border border-slate-700 flex items-center justify-center gap-2 transition-all">
+                                <i class="fa-brands fa-linkedin text-blue-400"></i>
+                                <span>Sign up with LinkedIn</span>
+                            </button>
+                        </div>
+
+                        <p class="text-[11px] text-slate-500 mt-4 font-mono">
+                            Free for initial 100 projects • Session hash mapped via FR-103 Session Claim
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Trust & Value Pillars Section -->
+        <section id="how-it-works" class="py-16 bg-slate-900/60 border-t border-foundry-border px-4 sm:px-6 lg:px-8">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">How JoinFoundry Replaces Traditional Networking</h2>
+                    <p class="text-sm text-foundry-muted">We eliminate warm introductions and bias. Your score is driven by hard market data, patent citations, and supply chain availability.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-foundry-surface p-6 rounded-2xl border border-foundry-border hover:border-foundry-cyan/50 transition-all">
+                        <div class="w-10 h-10 rounded-xl bg-foundry-cyan/10 text-foundry-cyan flex items-center justify-center font-bold font-mono mb-4">01</div>
+                        <h3 class="text-lg font-bold text-white mb-2">1-Line Automated Audit</h3>
+                        <p class="text-xs text-foundry-muted leading-relaxed">
+                            Input any problem statement. Our parallel worker queue queries PubMed, Google Ads, openFDA, and patent vector embeddings to build an objective Data Room in 60 seconds.
+                        </p>
+                    </div>
+
+                    <div class="bg-foundry-surface p-6 rounded-2xl border border-foundry-border hover:border-foundry-cyan/50 transition-all">
+                        <div class="w-10 h-10 rounded-xl bg-foundry-blue/10 text-foundry-blue flex items-center justify-center font-bold font-mono mb-4">02</div>
+                        <h3 class="text-lg font-bold text-white mb-2">The 800+ Threshold</h3>
+                        <p class="text-xs text-foundry-muted leading-relaxed">
+                            Projects achieving a Foundry Score ≥ 800 are automatically matched with active Corporate Capacity Directives (manufacturers, healthcare networks, logistics providers).
+                        </p>
+                    </div>
+
+                    <div class="bg-foundry-surface p-6 rounded-2xl border border-foundry-border hover:border-foundry-cyan/50 transition-all">
+                        <div class="w-10 h-10 rounded-xl bg-foundry-green/10 text-foundry-green flex items-center justify-center font-bold font-mono mb-4">03</div>
+                        <h3 class="text-lg font-bold text-white mb-2">Smart NDA Boardroom</h3>
+                        <p class="text-xs text-foundry-muted leading-relaxed">
+                            Trade secrets remain safe. Unlocking detailed CAD, code, and supplier specs requires automated Smart NDA execution logged on the platform's audit ledger.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-foundry-border bg-foundry-base py-8 px-4 sm:px-6 lg:px-8 text-xs text-foundry-muted">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+                <span class="font-bold text-white">joinfoundry.run</span>
+                <span>• Decentralized R&D Platform</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="#" class="hover:text-white">Privacy Protocol</a>
+                <a href="#" class="hover:text-white">Smart NDA Terms</a>
+                <a href="#" class="hover:text-white">Corporate Directives</a>
+            </div>
+            <p class="text-[11px] text-slate-500">Not financial advice. Valuation metrics are theoretical.</p>
+        </div>
+    </footer>
+
+    <!-- Interactive JavaScript Logic -->
+    <script>
+        function setPrompt(text) {
+            document.getElementById('problem-input').value = text;
+        }
+
+        function scrollToInput() {
+            document.getElementById('terminal-container').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('problem-input').focus();
+        }
+
+        function resetToHome() {
+            document.getElementById('terminal-container').classList.remove('hidden');
+            document.getElementById('scanning-overlay').classList.add('hidden');
+            document.getElementById('results-container').classList.add('hidden');
+            document.getElementById('problem-input').value = '';
+        }
+
+        function runAnalysis() {
+            const input = document.getElementById('problem-input').value.trim();
+            if (!input) {
+                alert('Please enter a 1-line problem statement or select a sample prompt.');
+                return;
+            }
+
+            // Hide Terminal, Show Loader
+            document.getElementById('terminal-container').classList.add('hidden');
+            document.getElementById('scanning-overlay').classList.remove('hidden');
+
+            const logs = document.getElementById('console-logs');
+            const progressBar = document.getElementById('progress-bar');
+            const stepLabel = document.getElementById('current-step-label');
+            
+            logs.innerHTML = '';
+            
+            const steps = [
+                { time: 300, progress: '15%', label: 'Scraping Google Ads & SerpAPI CPC metrics...', log: '[WORKER-01] Market Demand: Fetching search volume & CPC data...' },
+                { time: 900, progress: '35%', label: 'Querying Google Patents & ArXiv vector distance...', log: '[WORKER-02] White Space: Vector embedding cosine similarity calculated (0.78).' },
+                { time: 1600, progress: '60%', label: 'Classifying Regulatory Risk (CPNP / openFDA)...', log: '[WORKER-03] Regulatory: Domain mapped to Class II Medical Wearables.' },
+                { time: 2200, progress: '85%', label: 'Matching Alibaba & Kompass supplier density...', log: '[WORKER-04] Supply Chain: 14 ISO-certified manufacturing cleanrooms detected.' },
+                { time: 2800, progress: '100%', label: 'Computing 7-Pillar Score...', log: '[FOUNDRY ENGINE] Audit complete. Score generated: 840/1000.' }
+            ];
+
+            steps.forEach(step => {
+                setTimeout(() => {
+                    progressBar.style.width = step.progress;
+                    stepLabel.innerText = step.label;
+                    const p = document.createElement('p');
+                    p.className = 'text-foundry-cyan';
+                    p.innerText = step.log;
+                    logs.appendChild(p);
+                    logs.scrollTop = logs.scrollHeight;
+                }, step.time);
+            });
+
+            // Reveal Tier 1 Results after 3.2 seconds
+            setTimeout(() => {
+                document.getElementById('scanning-overlay').classList.add('hidden');
+                document.getElementById('results-container').classList.remove('hidden');
+                
+                // Format Title
+                const words = input.split(' ');
+                const title = words.slice(0, 7).join(' ') + (words.length > 7 ? '...' : '');
+                document.getElementById('project-title-display').innerText = title;
+                document.getElementById('session-id-display').innerText = 'Session Hash: ' + Math.random().toString(36).substring(2, 12) + ' (FR-101 Unclaimed)';
+            }, 3300);
+        }
+
+        function triggerAuth(provider) {
+            alert(`Initiating lightweight OAuth with ${provider}.\n\nIn the production app, this triggers the session-to-user claim mutation (FR-103) and transfers this Data Room into the user's persistent PostgreSQL account.`);
+        }
+    </script>
+</body>
+</html>
+
