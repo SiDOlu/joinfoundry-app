@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanya Itunu Dotun Oluwagbeyi - Lead Product Analyst CV</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #1e293b;
+            background-color: #f1f5f9;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            padding: 24px 0 48px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            padding: 15mm 18mm 14mm 18mm;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        .name {
+            font-size: 21pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.4px;
+            margin: 0 0 3px 0;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 10.5pt;
+            font-weight: 600;
+            color: #2563eb;
+            margin: 0 0 6px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .contact-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            font-size: 9.2pt;
+            color: #475569;
+        }
+
+        .contact-bar a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 13px;
+        }
+
+        h2 {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 3px;
+            margin: 0 0 7px 0;
+        }
+
+        .profile-text {
+            font-size: 9.5pt;
+            line-height: 1.45;
+            color: #334155;
+            margin: 0;
+            text-align: justify;
+        }
+
+        /* Competencies Table */
+        .skills-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.2pt;
+        }
+
+        .skills-table td {
+            padding: 3px 0;
+            vertical-align: top;
+            line-height: 1.38;
+        }
+
+        .skill-cat {
+            width: 28%;
+            font-weight: 700;
+            color: #0f172a;
+            padding-right: 10px;
+        }
+
+        .skill-val {
+            width: 72%;
+            color: #334155;
+        }
+
+        /* Experience */
+        .role-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 4px;
+        }
+
+        .role-title {
+            font-size: 10.2pt;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .role-date {
+            font-size: 9.2pt;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .company-name {
+            font-size: 9.5pt;
+            font-weight: 600;
+            font-style: italic;
+            color: #2563eb;
+            margin-bottom: 5px;
+        }
+
+        .project-heading {
+            font-size: 9.5pt;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 7px 0 3px 0;
+            padding-left: 6px;
+            border-left: 2.5px solid #2563eb;
+        }
+
+        ul.bullets {
+            margin: 3px 0 6px 0;
+            padding-left: 16px;
+        }
+
+        ul.bullets li {
+            font-size: 9.15pt;
+            line-height: 1.38;
+            color: #334155;
+            margin-bottom: 3.5px;
+        }
+
+        ul.bullets li strong {
+            color: #0f172a;
+        }
+
+        /* Education & Credentials */
+        .edu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .edu-item h3 {
+            font-size: 9.6pt;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 2px 0;
+        }
+
+        .edu-item .edu-inst {
+            font-size: 9pt;
+            font-weight: 600;
+            color: #2563eb;
+            margin: 0 0 2px 0;
+        }
+
+        .edu-item p {
+            font-size: 8.8pt;
+            line-height: 1.35;
+            color: #475569;
+            margin: 0;
+        }
+
+        .page-footer {
+            margin-top: auto;
+            padding-top: 6px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.2pt;
+            color: #64748b;
+        }
+
+        /* Print Floating Button */
+        .print-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: #ffffff;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            transition: background 0.2s;
+        }
+
+        .print-btn:hover {
+            background: #2563eb;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+                gap: 0;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 210mm;
+                height: 297mm;
+                page-break-after: always;
+                break-after: page;
+            }
+            .page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn no-print" onclick="window.print()">Print / Save as PDF</button>
+
+    <!-- PAGE 1 -->
+    <div class="page">
+        <div>
+            <header class="header">
+                <h1 class="name">Sanya Itunu Dotun Oluwagbeyi</h1>
+                <div class="subtitle">Lead Product Analyst | Data Architecture, Marketplace Economics &amp; AI-Assisted Analytics</div>
+                <div class="contact-bar">
+                    <span>St Helens, Merseyside, United Kingdom (WA10 1GP)</span>
+                    <span>+44 7343019450</span>
+                    <span><a href="mailto:sanyaitunuo@gmail.com">sanyaitunuo@gmail.com</a></span>
+                    <span><a href="https://www.linkedin.com/in/oluwagbeyid" target="_blank" rel="noopener">linkedin.com/in/oluwagbeyid</a></span>
+                </div>
+            </header>
+
+            <section>
+                <h2>Executive Profile</h2>
+                <p class="profile-text">
+                    Hands-on <strong>Lead Product Analyst, Systems Architect, and Product Builder</strong> with over 10 years of experience connecting customer behaviour, product events, and transactional data to explain and optimize commercial performance. Proven track record operating as a senior individual contributor—building trusted data models from scratch, sizing pricing and retention opportunities, designing rigorous experiments, and deploying AI-assisted self-service analytics tools that empower non-technical colleagues to explore data reliably. Seeking a high-ownership environment where I can establish the analytical agenda from first principles, shape marketplace unit economics, and turn deep data investigations into decisive product strategy.
+                </p>
+            </section>
+
+            <section>
+                <h2>Core Competencies &amp; Analytical Stack</h2>
+                <table class="skills-table">
+                    <tr>
+                        <td class="skill-cat">Product &amp; Marketplace Analytics</td>
+                        <td class="skill-val">Cohort Retention Analysis, Pricing &amp; Subscription Monetisation, Lifetime Gross Margin &amp; Unit Economics Modeling, Funnel &amp; Adoption Sizing, Experimentation (A/B Testing, Causal Inference &amp; Marketplace Cannibalisation Analysis).</td>
+                    </tr>
+                    <tr>
+                        <td class="skill-cat">SQL, Data Engineering &amp; Modeling</td>
+                        <td class="skill-val">Advanced Custom SQL Optimization, Event &amp; Transaction Data Modeling, ETL Pipelines, Multimodal Data Lakes, Data Instrumentation &amp; Tracking Architecture, Anomaly &amp; Leakage Detection.</td>
+                    </tr>
+                    <tr>
+                        <td class="skill-cat">AI-Assisted Self-Service &amp; BI</td>
+                        <td class="skill-val">Natural Language Data Exploration (RAG Pipelines &amp; Vector Databases), Practical AI Analytical Workflows (Claude, Cursor, ChatGPT), Executive Dashboards, Automated Metric Validation &amp; Reproducible Analysis.</td>
+                    </tr>
+                    <tr>
+                        <td class="skill-cat">Governance, Strategy &amp; Leadership</td>
+                        <td class="skill-val">Setting Analytical Foundations &amp; Metrics Governance, Engineering &amp; Product Cross-Functional Collaboration, NDPA-Accredited Data Protection Officer (DPO), UK GDPR / Privacy-by-Design.</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>Professional Experience</h2>
+
+                <div class="role-header">
+                    <span class="role-title">LEAD AI SYSTEMS ARCHITECT &amp; PRINCIPAL ANALYTICS CONSULTANT</span>
+                    <span class="role-date">2025 – Present</span>
+                </div>
+                <div class="company-name">Aetheralabs (aetheralabs.co.uk) — United Kingdom</div>
+                <ul class="bullets">
+                    <li><strong>AI-Assisted Analytical Workflows &amp; Self-Service Tooling:</strong> Built practical, reproducible AI workflows and Retrieval-Augmented Generation (RAG) interfaces that enable product and operational teams to query complex datasets in plain English while enforcing validation checks to prevent misleading outputs.</li>
+                    <li><strong>Behavioral Event &amp; Sensor Data Modeling:</strong> Partnered directly with engineering and domain leads to transform raw, high-frequency multi-sensor event streams into structured, trusted behavioral metrics and real-time operational insights.</li>
+                    <li><strong>Decision-Driven Experimentation:</strong> Shaped product validation frameworks from hypothesis definition through measurement, isolating genuine long-term user value from short-term noise.</li>
+                </ul>
+
+                <div class="role-header" style="margin-top: 10px;">
+                    <span class="role-title">CO-FOUNDER, CHIEF TECHNOLOGY OFFICER (CTO) &amp; LEAD, PROGRAMS &amp; SOLUTIONS</span>
+                    <span class="role-date">2015 – 2025</span>
+                </div>
+                <div class="company-name">Orange Invent House Ltd</div>
+
+                <div class="project-heading">Two-Sided Marketplace &amp; Monetisation Analytics: MyBalance (MyBalanceApp.com)</div>
+                <ul class="bullets">
+                    <li><strong>Marketplace Unit Economics &amp; Pricing Strategy:</strong> Conceived, built, and scaled a multi-tenant digital escrow marketplace, connecting user onboarding events, milestone completion rates, and transaction fees to optimize buyer-seller retention and lifetime gross margin.</li>
+                    <li><strong>Event Tracking &amp; Behavioral Funnel Optimization:</strong> Collaborated directly with engineering to instrument end-to-end user journey tracking, uncovering friction points in transaction adoption and guiding iterative product improvements that improved conversion and repeat usage.</li>
+                    <li><strong>Automated Risk &amp; Transaction Modeling:</strong> Engineered real-time transaction state and anomaly scoring models to balance fraud prevention against frictionless user experience across thousands of marketplace transactions.</li>
+                </ul>
+            </section>
+        </div>
+
+        <footer class="page-footer">
+            <span>Sanya Itunu Dotun Oluwagbeyi — Lead Product Analyst CV</span>
+            <span>Page 1 of 2</span>
+        </footer>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="page">
+        <div>
+            <section>
+                <h2>Professional Experience (Continued)</h2>
+
+                <div class="project-heading">Enterprise Data Foundations &amp; AI Self-Service: Open Banking &amp; Revenue Governance Platform</div>
+                <ul class="bullets">
+                    <li><strong>Trusted Data Modeling &amp; SQL Optimization:</strong> Architected a unified financial data lake normalizing millions of fragmented, non-standardized transaction records across multiple banks, writing custom SQL optimization pipelines that reduced query latency for executive decision-makers.</li>
+                    <li><strong>AI-Powered Natural Language Analytics:</strong> Built and deployed an enterprise RAG pipeline backed by vector databases so non-technical stakeholders could explore routine financial and revenue questions independently, freeing analytical capacity for deep-dive investigations.</li>
+                    <li><strong>Predictive Cohort &amp; Leakage Modeling:</strong> Developed probabilistic anomaly and forecasting models correlating live transaction inflows against historical baselines to identify revenue leakages and size high-impact interventions.</li>
+                    <li><strong>Data Governance &amp; Privacy-by-Design (DPO):</strong> Served as designated Data Protection Officer (NDPA/GDPR), embedding automated PII anonymization into analytical data models so teams could analyze customer behaviour safely and compliantly.</li>
+                </ul>
+
+                <div class="project-heading">Forensic Commercial &amp; Cohort Investigations (Multi-State Advisory Projects)</div>
+                <ul class="bullets">
+                    <li><strong>Deep-Dive Quantitative Investigation:</strong> Engineered custom SQL and ETL pipelines across multi-million record payroll, banking, and tax datasets (Ekiti, Niger, and Nasarawa States) to uncover systemic discrepancies and size multi-billion Naira revenue recovery opportunities.</li>
+                    <li><strong>Challenging Surface Metrics &amp; Translating Findings:</strong> Replaced opaque surface metrics with transparent, evidence-backed causal markers, coaching senior stakeholders to distinguish short-term anomalies from structural trends and act on verifiable evidence.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Education</h2>
+                <div class="edu-grid">
+                    <div class="edu-item">
+                        <h3>MSc International Business with Data Analytics</h3>
+                        <div class="edu-inst">Ulster University, United Kingdom</div>
+                        <p><em>Focus: Quantitative Business Modeling, Pricing &amp; Commercial Strategy, Data Analytics for Decision Making.</em></p>
+                    </div>
+                    <div class="edu-item">
+                        <h3>BSc (Hons) Computer Science (Second Class Upper Division)</h3>
+                        <div class="edu-inst">Joseph Ayo Babalola University, Nigeria | 2012</div>
+                        <p><em>President, National Association of Computer Science Students (NACOSS).</em></p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Certifications &amp; Credentials</h2>
+                <ul class="bullets">
+                    <li><strong>Certified Data Protection Officer (NDPA-Accredited)</strong> — <em>GDPR &amp; Analytical Data Governance</em></li>
+                    <li><strong>IBM Enterprise Design Thinking Practitioner</strong> — <em>User-Centered Product Discovery &amp; Experimentation</em></li>
+                    <li><strong>LinkedIn Certified: Leading with Innovation &amp; Digital Strategy</strong></li>
+                </ul>
+            </section>
+        </div>
+
+        <footer class="page-footer">
+            <span>Sanya Itunu Dotun Oluwagbeyi — Lead Product Analyst CV</span>
+            <span>Page 2 of 2</span>
+        </footer>
+    </div>
+
+</body>
+</html>
